@@ -48,16 +48,40 @@ Could be: `setq', `setopt', `customize-set-variables' or nil."
   :group 'varext
   :type 'symbol)
 
-(defun varext--extract-symbol (sexps)
-  "Loop, scrape and form the constructs."
-  (cl-loop with var
-           for sexp in sexps
-           for func = (car sexp)
-           for var = (nth 1 sexp)
-           for val = (or (nth 2 sexp) '())
-           when (eq func varext-type)
-           collect (list varext-setter var val) into options
-           finally (return options)))
+(defcustom varext-group-style 'vanilla-default
+  "How to format the results.
+
+Could be:
+`vanilla-default'
+`vanilla-flatten'
+`use-package'
+`leaf'
+`setup'.
+
+-- VANILLA-DEFAULT:
+(setter var1 val1)
+(setter var2 val2)
+(setter var3 val3)
+
+-- VANILLA-COMPACT:
+(setter var1 val1
+        var2 val2
+        var3 val3)
+
+- USE-PACKAGE:
+:custom(-face)?
+(var1 val1)
+(var2 val2)
+(var3 val3)
+
+-- LEAF:
+:custom(-face)?
+(var1 . val1)
+(var2 . val2)
+(var3 . val3)"
+
+  :group 'varext
+  :type 'symbol)
 
 (defun varext--collect-sexps-from-buffer (buf)
   "Collect S-expression from BUF."
