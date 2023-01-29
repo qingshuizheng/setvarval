@@ -1,0 +1,52 @@
+* Why
+Too often, when we are faced with a new package, one way to explore it is to extract the variables (defcustom/defvar/defconst/defface) to explore the variables one by one. This package saves you some time.
+
+There might be some better packages to do it, but this is my own.
+
+* Example
+This is what it looks like after extraction from Emacs builtin simple.el. It is truncated due to long list, and it is the reason this package exists.):
+
+#+begin_src emacs-lisp
+(setq idle-update-delay 0.5)
+(setq next-error-highlight 0.5)
+(setq next-error-highlight-no-select 0.5)
+(setq next-error-recenter nil)
+(setq next-error-message-highlight nil)
+(setq next-error-hook nil)
+(setq next-error-verbose t)
+(setq next-error-find-buffer-function #'ignore)
+(setq next-error-found-function #'ignore)
+(setq delete-trailing-lines t)
+(setq read-quoted-char-radix 8)
+(setq cycle-spacing-actions '(just-one-space delete-all-space restore))
+(setq delete-active-region t)
+(setq goto-line-history-local nil)
+(setq what-cursor-show-names nil)
+(setq eval-expression-print-level 4)
+(setq eval-expression-print-length 12)
+(setq eval-expression-debug-on-error t)
+(setq eval-expression-print-maximum-character 127)
+.
+.
+.
+.
+and more variables, but truncated
+#+end_src
+
+
+* Installation
+
+#+begin_src emacs-lisp
+(use-package varext
+  :straight (:host "github" :repo "qingshuizheng/varext")
+  :config
+  (setq varext-setter 'setq)    ; 'setopt
+  (setq varext-type 'defcustom) ; 'defvar, 'defconst, 'defface
+  )
+#+end_src
+
+* Usage
+Go to the package buffer and =M-x varext-extract RET=, variables are saved to kill-ring, copy it to where you want to use
+
+* Inspirations
+[[https://github.com/rubikitch/auto-document][auto-document]]
