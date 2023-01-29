@@ -76,7 +76,11 @@
   (kill-new
    (let* ((list (varext--construct (current-buffer))))
      ;; SRC 2023-01-29: https://stackoverflow.com/questions/18979300
-     (mapconcat (lambda (x) (format "%S" x)) list "\n"))))
+     (mapconcat
+      (pcase varext-setter
+        ((or 'setq 'setopt) (lambda (x) (format "%S" x)))
+        (`nil (lambda (x) (substring-no-properties (format "%S" x) 5 -1))))
+      list "\n"))))
 
 
 (provide 'varext)
