@@ -1,0 +1,2 @@
+# varext
+Extract package variables.
