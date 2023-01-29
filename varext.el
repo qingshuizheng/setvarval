@@ -85,12 +85,13 @@ Could be: `setq', `setopt' or nil."
                  '(setq setopt nil)))))
 
 ;;;###autoload
-(defun varext-extract ()
-  "Extract variables to kill-ring."
-  (interactive)
+(defun varext-extract (&optional arg)
+  "Extract variables to kill-ring.
+With C-u prefix, run `varext-setting' first."
+  (interactive "p")
+  (when current-prefix-arg (varext-setting))
   (kill-new
    (let* ((list (varext--construct (current-buffer))))
-     ;; SRC 2023-01-29: https://stackoverflow.com/questions/18979300
      (mapconcat
       (pcase varext-setter
         ((or 'setq 'setopt) (lambda (x) (format "%S" x)))

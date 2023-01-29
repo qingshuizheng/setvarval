@@ -7,7 +7,7 @@ Too often, when we are faced with a new package, one way to explore it is to ext
 There might be some better packages to do it, but this is my own.
 
 * Example
-This is what it looks like after extraction from Emacs builtin =simple.el=. It is truncated due to long list, and it is the reason this package exists.):
+This is what it looks like after extraction from Emacs builtin =simple.el=. It is truncated due to long list, and it is the reason why this package exists. :-)
 
 #+begin_src emacs-lisp
 (setq idle-update-delay 0.5)
@@ -43,8 +43,7 @@ more and more and more going on...
 #+end_src
 
 * Usage
-1. (optional) =M-x varext-setting RET= to choose which type of variable to collect and which setter to use after collecting.
-2. Go to the package buffer and =M-x varext-extract RET=, variables are saved to kill-ring.
+Go to the package buffer and =M-x varext-extract RET=, variables will be saved to kill-ring. If you need to change setter and variable type, prefix =C-u= before the command to trigger settings.
 
 * Inspirations
 [[https://github.com/rubikitch/auto-document][rubikitch/auto-document]]
