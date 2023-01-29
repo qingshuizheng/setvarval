@@ -1,10 +1,13 @@
+#+title: VarExt - Variable Extraction
+
+
 * Why
-Too often, when we are faced with a new package, one way to explore it is to extract the variables (defcustom/defvar/defconst/defface) to explore the variables one by one. This package saves you some time.
+Too often, when we are faced with a new package, one way to explore it is to extract the variables (defcustom/defvar/defconst/defface) one by one. This package saves you some time.
 
 There might be some better packages to do it, but this is my own.
 
 * Example
-This is what it looks like after extraction from Emacs builtin simple.el. It is truncated due to long list, and it is the reason this package exists.):
+This is what it looks like after extraction from Emacs builtin =simple.el=. It is truncated due to long list, and it is the reason this package exists.):
 
 #+begin_src emacs-lisp
 (setq idle-update-delay 0.5)
@@ -21,18 +24,12 @@ This is what it looks like after extraction from Emacs builtin simple.el. It is 
 (setq cycle-spacing-actions '(just-one-space delete-all-space restore))
 (setq delete-active-region t)
 (setq goto-line-history-local nil)
-(setq what-cursor-show-names nil)
-(setq eval-expression-print-level 4)
-(setq eval-expression-print-length 12)
-(setq eval-expression-debug-on-error t)
-(setq eval-expression-print-maximum-character 127)
 .
 .
 .
 .
-and more variables, but truncated
+more and more and more going on...
 #+end_src
-
 
 * Installation
 
@@ -40,13 +37,14 @@ and more variables, but truncated
 (use-package varext
   :straight (:host "github" :repo "qingshuizheng/varext")
   :config
-  (setq varext-setter 'setq)    ; 'setopt
   (setq varext-type 'defcustom) ; 'defvar, 'defconst, 'defface
+  (setq varext-setter 'setq)    ; 'setopt
   )
 #+end_src
 
 * Usage
-Go to the package buffer and =M-x varext-extract RET=, variables are saved to kill-ring, copy it to where you want to use
+1. (optional) =M-x varext-setting RET= to choose which type of variable to collect and which setter to use after collecting.
+2. Go to the package buffer and =M-x varext-extract RET=, variables are saved to kill-ring.
 
 * Inspirations
-[[https://github.com/rubikitch/auto-document][auto-document]]
+[[https://github.com/rubikitch/auto-document][rubikitch/auto-document]]

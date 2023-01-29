@@ -36,13 +36,15 @@
   :group 'utilities
   :prefix "varext-")
 
-(defcustom varext-setter 'setq
-  "Setter to use: `setq', `setopt' or nil."
+(defcustom varext-type 'defcustom
+  "Which variable to collect.
+Could be: `defcustom', `defvar', `defface', or `defconst'."
   :group 'varext
   :type 'symbol)
 
-(defcustom varext-type 'defcustom
-  "What to extract: `defcustom', `defvar', `defface', or `defconst'."
+(defcustom varext-setter 'setq
+  "Which setter to use after collecting.
+Could be: `setq', `setopt' or nil."
   :group 'varext
   :type 'symbol)
 
@@ -68,6 +70,19 @@
                                    (read (current-buffer))
                                  (error nil)))
                 collect it)))))
+
+;;;###autoload
+(defun varext-setting ()
+  "Interactvely config settings."
+  (interactive)
+  (setq varext-type
+        (intern (completing-read
+                 "Which type to collect: "
+                 '(defcustom defvar defconst defface))))
+  (setq varext-setter
+        (intern (completing-read
+                 "Which setter to use after collecting: "
+                 '(setq setopt nil)))))
 
 ;;;###autoload
 (defun varext-extract ()
