@@ -36,15 +36,15 @@
   :group 'utilities
   :prefix "varext-")
 
-(defcustom varext-type 'defcustom
+(defcustom varext-extract-type 'defcustom
   "Which variable to collect.
 Could be: `defcustom', `defvar', `defface', or `defconst'."
   :group 'varext
   :type 'symbol)
 
-(defcustom varext-setter 'setq
+(defcustom varext-group-setter 'setq
   "Which setter to use after collecting.
-Could be: `setq', `setopt' or nil."
+Could be: `setq', `setopt', `customize-set-variables' or nil."
   :group 'varext
   :type 'symbol)
 
@@ -59,30 +59,41 @@ Could be: `setq', `setopt' or nil."
            collect (list varext-setter var val) into options
            finally (return options)))
 
-(defun varext--construct (buf)
-  "Scan for command definitions in BUF and return data structure."
+(defun varext--collect-sexps-from-buffer (buf)
+  "Collect S-expression from BUF."
   (with-current-buffer buf
     (save-excursion
       (goto-char (point-min))
-      (varext--extract-symbol
-       (cl-loop with it
-                while (setq it (condition-case v
-                                   (read (current-buffer))
-                                 (error nil)))
-                collect it)))))
+      (cl-loop with it
+               while (setq it (condition-case v
+                                  (read (current-buffer))
+                                (error nil)))
+               collect it))))
+
+(defun varext--collect-variables-from-sexps (buf)
+  "Collect variables from S-expression from BUF."
+  (let ((sexps (varext--collect-sexps-from-buffer buf)))
+    (cl-loop with var
+             for sexp in sexps
+             for func = (car sexp)
+             for var = (nth 1 sexp)
+             for val = (or (nth 2 sexp) '())
+             when (eq func varext-extract-type)
+             collect (list varext-group-setter var val) into options
+             finally (return options))))
 
 ;;;###autoload
 (defun varext-setting ()
   "Interactvely config settings."
   (interactive)
-  (setq varext-type
+  (setq varext-extract-type
         (intern (completing-read
                  "Which type to collect: "
                  '(defcustom defvar defconst defface))))
-  (setq varext-setter
+  (setq varext-group-setter
         (intern (completing-read
                  "Which setter to use after collecting: "
-                 '(setq setopt nil)))))
+                 '(setq setopt customize-set-variables nil)))))
 
 ;;;###autoload
 (defun varext-extract (&optional arg)
@@ -91,9 +102,9 @@ With C-u prefix, run `varext-setting' first."
   (interactive "p")
   (when current-prefix-arg (varext-setting))
   (kill-new
-   (let* ((list (varext--construct (current-buffer))))
+   (let* ((list (varext--collect-variables-from-sexps (current-buffer))))
      (mapconcat
-      (pcase varext-setter
+      (pcase varext-group-setter
         ((or 'setq 'setopt) (lambda (x) (format "%S" x)))
         (`nil (lambda (x) (substring-no-properties (format "%S" x) 5 -1))))
       list "\n"))))
