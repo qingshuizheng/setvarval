@@ -150,6 +150,7 @@ Alternatives: `setopt', `custom-set-variables', `defface',
                                one-setter
                                use-package:custom
                                leaf:custom
+                               leaf:custom*
                                setup:option))))
                   ((or 'defvar 'defconst)
                    (intern (completing-read
@@ -198,6 +199,7 @@ With C-u prefix, run `setvarval-setting' first."
   (kill-new
    (let* ((list (setvarval--collect-args-from-sexps (current-buffer))))
      (pcase setvarval-group-style
+       ;; -- VANILLA
        ('simple
         (mapconcat
          (lambda (x) (push setvarval-group-setter x) (format "%S" x))
@@ -208,6 +210,8 @@ With C-u prefix, run `setvarval-setting' first."
             (mapconcat
              (lambda (x) (substring-no-properties (format "%S" x) 1 -1))
              list "\n")))
+       
+       ;; -- USE-PACKAGE: https://github.com/jwiegley/use-package#package-customization
        ('use-package:custom
         (setvarval--string-wrap
             ":custom\n" nil
@@ -219,6 +223,12 @@ With C-u prefix, run `setvarval-setting' first."
              (mapconcat
               (lambda (x) (format "%S" x)) list "\n")
              1)))
+       
+       ;; -- LEAF: https://github.com/conao3/leaf.el#custom-custom-custom-face-keywords
+       ('leaf:custom*
+        (setvarval--string-wrap
+            ":custom*\n(" ")"
+            (mapconcat (lambda (x) (format "%S" x)) list "\n")))
        ('leaf:custom
         (setvarval--string-wrap
             ":custom\n" nil
@@ -241,6 +251,8 @@ With C-u prefix, run `setvarval-setting' first."
                        (format "%S" (cadr x))
                        ")"))
              list "\n")))
+       
+       ;; -- SETUP: https://www.emacswiki.org/emacs/SetupEl
        ('setup:option
         (setvarval--string-wrap
             "(:option\n" ")"
