@@ -222,14 +222,22 @@ With C-u prefix, run `setvarval-setting' first."
             ":custom\n" nil
             (mapconcat
              (lambda (x)
-               (format "%S" (cons (car x) (cdr x))))
+               (concat "("
+                       (format "%S" (car x))
+                       " . "
+                       (format "%S" (cadr x))
+                       ")"))
              list "\n")))
        ('leaf:custom-face
         (setvarval--string-wrap
             ":custom-face\n" nil
             (mapconcat
              (lambda (x)
-               (format "%S" (cons (car x) (cdr x))))
+               (concat "("
+                       (format "%S" (car x))
+                       " . "
+                       (format "%S" (cadr x))
+                       ")"))
              list "\n")))
        ('setup:option
         (setvarval--string-wrap
