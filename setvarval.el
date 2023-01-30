@@ -36,6 +36,9 @@
   :group 'utilities
   :prefix "setvarval-")
 
+
+;;;; CUSTOMIZATIONS
+
 (defcustom setvarval-extract-type 'defcustom
   "Which variable to collect.
 Could be: `defcustom', `defvar', `defface', or `defconst'."
@@ -44,7 +47,7 @@ Could be: `defcustom', `defvar', `defface', or `defconst'."
 
 (defcustom setvarval-group-setter 'setq
   "Which setter to use after collecting.
-Could be: `setq', `setopt', `customize-set-variables' or nil."
+Could be: `setq', `setopt', `customize-set-variable' or nil."
   :group 'setvarval
   :type 'symbol)
 
@@ -58,7 +61,7 @@ Could be: `setq', `setopt', `customize-set-variables' or nil."
 
 Could be:
 `vanilla-default'
-`vanilla-flatten'
+`vanilla-one-setter'
 `use-package'
 `leaf'
 `setup'.
@@ -68,7 +71,7 @@ Could be:
 (setter var2 val2)
 (setter var3 val3)
 
--- VANILLA-COMPACT:
+-- VANILLA-ONE-SETTER:
 (setter var1 val1
         var2 val2
         var3 val3)
@@ -87,6 +90,10 @@ Could be:
 
   :group 'setvarval
   :type 'symbol)
+
+
+
+;;;; INTERNAL FUNCTIONALS - data retrieval
 
 (defun setvarval--collect-sexps-from-buffer (buf)
   "Collect S-expression from BUF."
@@ -114,6 +121,9 @@ Could be:
                (list var val))
              into options
              finally (return options))))
+
+
+;;;; COMMANDS
 
 ;;;###autoload
 (defun setvarval-setting ()
