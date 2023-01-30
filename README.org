@@ -41,6 +41,7 @@ more and more and more going on...
   :config
   (setq setvarval-extract-type 'defcustom) ; 'defvar, 'defconst, 'defface
   (setq setvarval-group-setter 'setq)      ; 'setopt, 'customize-set-variables
+  (setq setvarval-group-style 'simple)     ; 'simple, 'group 'use-package 'leaf 'setup
   )
 #+end_src
 

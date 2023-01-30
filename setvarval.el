@@ -56,27 +56,27 @@ Could be: `setq', `setopt', `customize-set-variable' or nil."
   :group 'setvarval
   :type 'boolean)
 
-(defcustom setvarval-group-style 'vanilla-default
+(defcustom setvarval-group-style 'simple
   "How to format the results.
 
 Could be:
-`vanilla-default'
-`vanilla-one-setter'
+`simple'
+`one-setter'
 `use-package'
 `leaf'
 `setup'.
 
--- VANILLA-DEFAULT:
+-- SIMPLE:
 (setter var1 val1)
 (setter var2 val2)
 (setter var3 val3)
 
--- VANILLA-ONE-SETTER:
+-- ONE-SETTER:
 (setter var1 val1
         var2 val2
         var3 val3)
 
-- USE-PACKAGE:
+-- USE-PACKAGE:
 :custom(-face)?
 (var1 val1)
 (var2 val2)
@@ -139,17 +139,17 @@ Could be:
                  '(setq setopt customize-set-variables nil)))))
 
 ;;;###autoload
-(defun setvarval-extract (&optional arg)
+(defun setvarval-extract (arg)
   "Extract variables to kill-ring.
 With C-u prefix, run `setvarval-setting' first."
-  (interactive "p")
-  (when current-prefix-arg (setvarval-setting))
+  (interactive "P")
+  (when arg (setvarval-setting))
   (kill-new
    (let* ((list (setvarval--collect-variables-from-sexps (current-buffer))))
      (mapconcat
       (pcase setvarval-group-setter
-        ((or 'setq 'setopt) (lambda (x) (format "%S" x)))
-        (`nil (lambda (x) (substring-no-properties (format "%S" x) 5 -1))))
+        (`nil (lambda (x) (format "%S" x)))
+        (_ (lambda (x) (push setvarval-group-setter x) (format "%S"  x))))
       list "\n"))))
 
 
