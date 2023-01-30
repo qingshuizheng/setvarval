@@ -48,6 +48,11 @@ Could be: `setq', `setopt', `customize-set-variables' or nil."
   :group 'setvarval
   :type 'symbol)
 
+(defcustom setvarval-include-doc nil
+  "Whether include doc or not."
+  :group 'setvarval
+  :type 'boolean)
+
 (defcustom setvarval-group-style 'vanilla-default
   "How to format the results.
 
@@ -97,13 +102,17 @@ Could be:
 (defun setvarval--collect-variables-from-sexps (buf)
   "Collect variables from S-expression from BUF."
   (let ((sexps (setvarval--collect-sexps-from-buffer buf)))
-    (cl-loop with var
-             for sexp in sexps
+    (cl-loop for sexp in sexps
              for func = (car sexp)
              for var = (nth 1 sexp)
-             for val = (or (nth 2 sexp) '())
+             for val = (nth 2 sexp)
+             for doc = (nth 3 sexp)
              when (eq func setvarval-extract-type)
-             collect (list setvarval-group-setter var val) into options
+             collect
+             (if setvarval-include-doc
+                 (list var val doc)
+               (list var val))
+             into options
              finally (return options))))
 
 ;;;###autoload
