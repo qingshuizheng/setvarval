@@ -41,20 +41,9 @@
 
 (defcustom setvarval-extract-type 'defcustom
   "Which variable to collect.
-Could be: `defcustom', `defvar', `defface', or `defconst'."
+Alternatives: `defvar', `defface', or `defconst'."
   :group 'setvarval
   :type 'symbol)
-
-(defcustom setvarval-group-setter 'setq
-  "Which setter to use after collecting.
-Could be: `setq', `setopt', `customize-set-variable' or nil."
-  :group 'setvarval
-  :type 'symbol)
-
-(defcustom setvarval-include-doc nil
-  "Whether include doc or not."
-  :group 'setvarval
-  :type 'boolean)
 
 (defcustom setvarval-group-style 'simple
   "How to format the results.
@@ -62,9 +51,11 @@ Could be: `setq', `setopt', `customize-set-variable' or nil."
 Could be:
 `simple'
 `one-setter'
-`use-package'
-`leaf'
-`setup'.
+`use-package:custom'
+`use-package:custom-face'
+`leaf:custom'
+`leaf:custom-face'
+`setup:option'.
 
 -- SIMPLE:
 (setter var1 val1)
@@ -76,21 +67,39 @@ Could be:
         var2 val2
         var3 val3)
 
--- USE-PACKAGE:
-:custom(-face)?
+-- USE-PACKAGE:CUSTOM
+:custom
 (var1 val1)
 (var2 val2)
 (var3 val3)
 
--- LEAF:
+-- USE-PACKAGE:CUSTOM-FACE
+:custom
+(var1 (substring-no-properties val1 1))
+(var2 (substring-no-properties val2 1))
+(var3 (substring-no-properties val3 1))
+
+-- LEAF:CUSTOM(-FACE)
 :custom(-face)?
 (var1 . val1)
 (var2 . val2)
-(var3 . val3)"
+(var3 . val3)
+
+-- SETUP:OPTION
+(:option
+ var1 val1
+ var2 val2
+ var3 val3)"
 
   :group 'setvarval
   :type 'symbol)
 
+(defcustom setvarval-group-setter 'setq
+  "Which setter to use after collecting.
+Alternatives: `setopt', `customize-set-variable', `defface',
+`custom-set-face', or any random text you like."
+  :group 'setvarval
+  :type 'symbol)
 
 
 ;;;; INTERNAL FUNCTIONALS - data retrieval
@@ -106,21 +115,21 @@ Could be:
                                 (error nil)))
                collect it))))
 
-(defun setvarval--collect-variables-from-sexps (buf)
+(defun setvarval--collect-args-from-sexps (buf)
   "Collect variables from S-expression from BUF."
   (let ((sexps (setvarval--collect-sexps-from-buffer buf)))
     (cl-loop for sexp in sexps
              for func = (car sexp)
              for var = (nth 1 sexp)
              for val = (nth 2 sexp)
-             for doc = (nth 3 sexp)
              when (eq func setvarval-extract-type)
-             collect
-             (if setvarval-include-doc
-                 (list var val doc)
-               (list var val))
-             into options
-             finally (return options))))
+             collect (list var val) into args
+             finally (return args))))
+
+(defun setvarval--string-wrap (prefix suffix s)
+  "String wrap."
+  (declare (indent 1))
+  (concat prefix s suffix))
 
 
 ;;;; COMMANDS
@@ -129,14 +138,54 @@ Could be:
 (defun setvarval-setting ()
   "Interactvely config settings."
   (interactive)
-  (setq setvarval-extract-type
-        (intern (completing-read
-                 "Which type to collect: "
-                 '(defcustom defvar defconst defface))))
-  (setq setvarval-group-setter
-        (intern (completing-read
-                 "Which setter to use after collecting: "
-                 '(setq setopt customize-set-variables nil)))))
+  (let* ((type (intern (completing-read
+                        "Which type to collect: "
+                        '(defcustom defvar defconst defface))))
+         (style (pcase type
+                  ('defcustom
+                    (intern (completing-read
+                             "Which style to set: "
+                             '(simple
+                               one-setter
+                               use-package:custom
+                               leaf:custom
+                               setup:option))))
+                  ((or 'defvar 'defconst)
+                   (intern (completing-read
+                            "Which Syle to set: "
+                            '(simple
+                              one-setter))))
+                  ('deface
+                   (intern (completing-read
+                            "Which style to set: "
+                            '(simple
+                              use-package:custom-face
+                              leaf:custom-face))))))
+         (setter (pcase type
+                   ('defcustom
+                     (intern (completing-read
+                              "Which setter to use: "
+                              '(setq
+                                setopt
+                                setq-local
+                                setq-default
+                                customize-set-variable))))
+                   ((or 'defvar 'defconst)
+                    (intern (completing-read
+                             "Which setter to use: "
+                             '(setq
+                               setq-local
+                               setq-default))))
+                   ('defface
+                     (intern (completing-read
+                              "Which setter to use: "
+                              '(defface
+                                 custom-set-faces
+                                 setq-local
+                                 setq-default)))))))
+    (setq setvarval-extract-type type)
+    (setq setvarval-group-style style)
+    (setq setvarval-group-setter setter)))
 
 ;;;###autoload
 (defun setvarval-extract (arg)
@@ -145,12 +194,50 @@ With C-u prefix, run `setvarval-setting' first."
   (interactive "P")
   (when arg (setvarval-setting))
   (kill-new
-   (let* ((list (setvarval--collect-variables-from-sexps (current-buffer))))
-     (mapconcat
-      (pcase setvarval-group-setter
-        (`nil (lambda (x) (format "%S" x)))
-        (_ (lambda (x) (push setvarval-group-setter x) (format "%S"  x))))
-      list "\n"))))
+   (let* ((list (setvarval--collect-args-from-sexps (current-buffer))))
+     (pcase setvarval-group-style
+       ('simple
+        (mapconcat
+         (lambda (x) (push setvarval-group-setter x) (format "%S" x))
+         list "\n"))
+       ('one-setter
+        (setvarval--string-wrap
+            (format "(%S " setvarval-group-setter) ")"
+            (mapconcat
+             (lambda (x) (substring-no-properties (format "%S" x) 1 -1))
+             list "\n")))
+       ('use-package:custom
+        (setvarval--string-wrap
+            ":custom\n" nil
+            (mapconcat (lambda (x) (format "%S" x)) list "\n")))
+       ('use-package:custom-face
+        (setvarval--string-wrap
+            ":custom-face\n" nil
+            (substring-no-properties
+             (mapconcat
+              (lambda (x) (format "%S" x)) list "\n")
+             1)))
+       ('leaf:custom
+        (setvarval--string-wrap
+            ":custom\n" nil
+            (mapconcat
+             (lambda (x)
+               (format "%S" (cons (car x) (cdr x))))
+             list "\n")))
+       ('leaf:custom-face
+        (setvarval--string-wrap
+            ":custom-face\n" nil
+            (mapconcat
+             (lambda (x)
+               (format "%S" (cons (car x) (cdr x))))
+             list "\n")))
+       ('setup:option
+        (setvarval--string-wrap
+            "(:option\n" ")"
+            (mapconcat
+             (lambda (x)
+               (substring-no-properties (format "%S" x) 1 -1))
+             list "\n")))))))
 
 
 (provide 'setvarval)
