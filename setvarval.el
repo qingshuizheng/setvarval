@@ -96,10 +96,11 @@ Could be:
 
 (defcustom setvarval-group-setter 'setq
   "Which setter to use after collecting.
-Alternatives: `setopt', `customize-set-variable', `defface',
-`custom-set-face', or any random text you like."
+Alternatives: `setopt', `custom-set-variables', `defface',
+`custom-set-faces', or any random text you like."
   :group 'setvarval
   :type 'symbol)
+
 
 
 ;;;; INTERNAL FUNCTIONALS - data retrieval
@@ -169,17 +170,18 @@ Alternatives: `setopt', `customize-set-variable', `defface',
                                 setopt
                                 setq-local
                                 setq-default
-                                customize-set-variable))))
+                                custom-set-variables))))
                    ((or 'defvar 'defconst)
                     (intern (completing-read
                              "Which setter to use: "
                              '(setq
                                setq-local
-                               setq-default))))
+                               setq-default
+                               custom-set-variables))))
                    ('defface
                      (intern (completing-read
                               "Which setter to use: "
-                              '(defface
+                              '( defface
                                  custom-set-faces
                                  setq-local
                                  setq-default)))))))
