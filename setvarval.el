@@ -94,7 +94,7 @@ Could be:
     (save-excursion
       (goto-char (point-min))
       (cl-loop with it
-               while (setq it (condition-case v
+               while (setq it (condition-case _
                                   (read (current-buffer))
                                 (error nil)))
                collect it))))
