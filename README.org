@@ -1,13 +1,15 @@
-#+title: VarExt - Variable Extraction
+#+title: SetVarVal - (Setq Var Val)
 
 
 * Why
-Too often, when we are faced with a new package, one way to explore it is to extract the variables (defcustom/defvar/defconst/defface) one by one. This package saves you some time.
+
+Too often, when we are faced with a new package, one way to explore it is to extract the variables (defcustom/defvar/defconst/defface) and reorganize in a new style. This package saves you some time.
 
 There might be some better packages to do it, but this is my own.
 
 * Example
-This is what it looks like after extraction from Emacs builtin =simple.el=. It is truncated due to long list, and it is the reason why this package exists. :-)
+
+This is what it looks like after extraction from Emacs builtin =simple.el= with default settings. It is truncated due to long list, and it is the reason why this package exists. :-)
 
 #+begin_src emacs-lisp
 (setq idle-update-delay 0.5)
@@ -34,16 +36,43 @@ more and more and more going on...
 * Installation
 
 #+begin_src emacs-lisp
-(use-package varext
-  :straight (:host "github" :repo "qingshuizheng/varext")
+(use-package setvarval
+  :straight (:host "github" :repo "qingshuizheng/setvarval")
   :config
-  (setq varext-type 'defcustom) ; 'defvar, 'defconst, 'defface
-  (setq varext-setter 'setq)    ; 'setopt
+  (setq setvarval-extract-type 'defcustom) ; 'defvar, 'defconst, 'defface
+  (setq setvarval-group-setter 'setq)      ; 'setopt, 'customize-set-variables
   )
 #+end_src
 
 * Usage
+
 Go to the package buffer and =M-x varext-extract RET=, variables will be saved to kill-ring. If you need to change setter and variable type, prefix =C-u= before the command to trigger settings.
 
+* TODO list (no ETA)
+
+- extract type
+  - [X] defcustom
+  - [X] defface
+  - [X] defvar
+  - [X] defconst
+- group setter
+  - [ ] setq
+  - [ ] setopt
+  - [ ] customize-set-variables
+  - [ ] empty setter
+- group styles
+  - [ ] use-package
+  - [ ] leaf
+  - [ ] setup
+  - [ ] vanilla
+    - [ ] default: one line
+    - [ ] flatten: grouping wih only one setter
+- content-aware
+  - [ ] use-package
+  - [ ] leaf
+  - [ ] setup
+  - [ ] non of the above, select from feature or file, with prefix with arg
+
 * Inspirations
+
 [[https://github.com/rubikitch/auto-document][rubikitch/auto-document]]

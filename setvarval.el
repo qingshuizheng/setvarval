@@ -1,4 +1,4 @@
-;;; varext.el --- Extract variables from package -*- lexical-binding: t; -*-
+;;; setvarval.el --- Extract variables from package -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (c) 2022, Qingshui Zheng <qingshuizheng at outlook dot com>
 ;;
@@ -7,7 +7,7 @@
 ;;
 ;; Created: 21 Dec 2022
 ;;
-;; URL: https://github.com/qingshuizheng/varext
+;; URL: https://github.com/qingshuizheng/setvarval
 ;;
 ;; License: GPLv3
 ;;
@@ -31,24 +31,24 @@
 ;;
 ;;; Code:
 
-(defgroup varext nil
+(defgroup setvarval nil
   "Variable extraction."
   :group 'utilities
-  :prefix "varext-")
+  :prefix "setvarval-")
 
-(defcustom varext-extract-type 'defcustom
+(defcustom setvarval-extract-type 'defcustom
   "Which variable to collect.
 Could be: `defcustom', `defvar', `defface', or `defconst'."
-  :group 'varext
+  :group 'setvarval
   :type 'symbol)
 
-(defcustom varext-group-setter 'setq
+(defcustom setvarval-group-setter 'setq
   "Which setter to use after collecting.
 Could be: `setq', `setopt', `customize-set-variables' or nil."
-  :group 'varext
+  :group 'setvarval
   :type 'symbol)
 
-(defcustom varext-group-style 'vanilla-default
+(defcustom setvarval-group-style 'vanilla-default
   "How to format the results.
 
 Could be:
@@ -80,10 +80,10 @@ Could be:
 (var2 . val2)
 (var3 . val3)"
 
-  :group 'varext
+  :group 'setvarval
   :type 'symbol)
 
-(defun varext--collect-sexps-from-buffer (buf)
+(defun setvarval--collect-sexps-from-buffer (buf)
   "Collect S-expression from BUF."
   (with-current-buffer buf
     (save-excursion
@@ -94,45 +94,45 @@ Could be:
                                 (error nil)))
                collect it))))
 
-(defun varext--collect-variables-from-sexps (buf)
+(defun setvarval--collect-variables-from-sexps (buf)
   "Collect variables from S-expression from BUF."
-  (let ((sexps (varext--collect-sexps-from-buffer buf)))
+  (let ((sexps (setvarval--collect-sexps-from-buffer buf)))
     (cl-loop with var
              for sexp in sexps
              for func = (car sexp)
              for var = (nth 1 sexp)
              for val = (or (nth 2 sexp) '())
-             when (eq func varext-extract-type)
-             collect (list varext-group-setter var val) into options
+             when (eq func setvarval-extract-type)
+             collect (list setvarval-group-setter var val) into options
              finally (return options))))
 
 ;;;###autoload
-(defun varext-setting ()
+(defun setvarval-setting ()
   "Interactvely config settings."
   (interactive)
-  (setq varext-extract-type
+  (setq setvarval-extract-type
         (intern (completing-read
                  "Which type to collect: "
                  '(defcustom defvar defconst defface))))
-  (setq varext-group-setter
+  (setq setvarval-group-setter
         (intern (completing-read
                  "Which setter to use after collecting: "
                  '(setq setopt customize-set-variables nil)))))
 
 ;;;###autoload
-(defun varext-extract (&optional arg)
+(defun setvarval-extract (&optional arg)
   "Extract variables to kill-ring.
-With C-u prefix, run `varext-setting' first."
+With C-u prefix, run `setvarval-setting' first."
   (interactive "p")
-  (when current-prefix-arg (varext-setting))
+  (when current-prefix-arg (setvarval-setting))
   (kill-new
-   (let* ((list (varext--collect-variables-from-sexps (current-buffer))))
+   (let* ((list (setvarval--collect-variables-from-sexps (current-buffer))))
      (mapconcat
-      (pcase varext-group-setter
+      (pcase setvarval-group-setter
         ((or 'setq 'setopt) (lambda (x) (format "%S" x)))
         (`nil (lambda (x) (substring-no-properties (format "%S" x) 5 -1))))
       list "\n"))))
 
 
-(provide 'varext)
-;;; varext.el ends here
+(provide 'setvarval)
+;;; setvarval.el ends here
