@@ -29,7 +29,6 @@ This is what it looks like after extraction from Emacs builtin =simple.el= with 
 ;; more and more and more going on...
 #+end_src
 
-
 If cursor within =use-package=, and =setvarval-group-style= is set to =use-package:custom=:
 
 #+begin_src emacs-lisp
@@ -54,7 +53,6 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
   )
 
 #+end_src
-
 
 * Installation
 

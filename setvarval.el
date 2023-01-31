@@ -453,19 +453,22 @@ TODO: support packages that are not loaded yet."
       ;; insert at cursor, so move cursor to target before running
       (save-excursion (insert result)))))
 
-(defun setvarval-extract-from-name (feature)
+(defun setvarval-extract-from-name (arg)
   "Extract variables from selected FEATURE, save to kill-ring.
 TODO: Sub-packages and dependancies is not supported currently.
 TODO: support packages that are not loaded yet."
-  (interactive (list (completing-read "Choose package: " features)))
-  (with-temp-buffer
-    (insert-file-contents
-     (find-library-name feature))
-    (goto-char (point-min))
-    (setvarval-extract-buffer nil nil))
-  (message "%s variables extracted to kill-ring." (upcase feature)))
+  (interactive "P")
+  (when arg (setvarval-config))
+  (let ((feature (completing-read "Choose package: " features)))
+    (with-temp-buffer
+      (insert-file-contents
+       (find-library-name feature))
+      (goto-char (point-min))
+      (setvarval-extract-buffer nil nil))
+    (message "%s variables extracted to kill-ring." (upcase feature))))
 
 
 
 (provide 'setvarval)
 ;;; setvarval.el ends here
+
