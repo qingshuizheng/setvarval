@@ -56,8 +56,10 @@ Alternatives: `defvar', `defface', or `defconst'."
 Could be:
 `simple'
 `one-setter'
+`custom-set-*'
 `use-package:custom'
 `use-package:custom-face'
+`leaf:custom*'
 `leaf:custom'
 `leaf:custom-face'
 `setup:option'.
@@ -71,6 +73,12 @@ Could be:
 (setter var1 val1
         var2 val2
         var3 val3)
+
+-- CUSTOM-SET-*
+(custom-set-variables/faces
+ '(var1 val1)
+  (var2 val2)
+  (var3 val3))
 
 -- USE-PACKAGE:CUSTOM
 :custom
@@ -179,6 +187,12 @@ Alternatives: `setopt', `custom-set-variables', `defface',
           (format "%S" x) 1 -1))
        list "\n")))
 
+(defun setvarval--style-custom-set-* (list)
+  "Transform LIST into group style: one-setter."
+  (setvarval--string-wrap
+      (format "(%S\n" setvarval-group-setter) ")"
+      (mapconcat (lambda (x) (concat "'" (format "%S" x))) list "\n")))
+
 (defun setvarval--style-use-package:custom (list)
   "Transform LIST into group style: use-package:custom.
 See (info \"(use-package) User options\")."
@@ -261,11 +275,19 @@ With prefix C-u, set them to default value."
                   ('defcustom
                     (intern (completing-read
                              "Group style to organize variables: "
-                             '(simple
+                             '(;; -- (setter var1 val1) (setter var2 val2) ... ...
+                               simple
+                               ;; -- (setter var1 val1 var2 val2 ... ...)
                                one-setter
+                               ;; -- (custom-set-variables/faces '(var1 val1) '(var2 val2) ... ...)
+                               custom-set-*
+                               ;; -- :custom (var1 val2) (var2 val2) ... ...
                                use-package:custom
+                               ;; -- :custom* ((var1 val2) (var2 val2) ... ...)
                                leaf:custom*
+                               ;; -- :custom (var1 . val2) (var2 . val2) ... ...
                                leaf:custom
+                               ;; -- :option var1 val1 var2 val2 ... ...
                                setup:option))))
                   ((or 'defvar 'defconst)
                    (intern (completing-read
@@ -276,20 +298,22 @@ With prefix C-u, set them to default value."
                     (intern (completing-read
                              "Group style to organize variables: "
                              '(simple
+                               custom-set-*
+                               ;; -- :custom-face (var1 unquoted-val1) (var2 unquoted-val2) ... ...
                                use-package:custom-face
+                               ;; -- same as leaf:custom
                                leaf:custom-face))))))
          (setter (pcase type
                    ('defcustom
-                     (when (member style '(simple one-setter))
+                     (cond
+                      ((member style '(custom-set-*)) 'custom-set-variables)
+                      ((member style '(simple one-setter))
                        (intern (completing-read
                                 "Setter to use: "
                                 '(setq
                                   setopt
                                   setq-local
-                                  setq-default
-                                  ;; different form
-                                  ;; custom-set-variables
-                                  )))))
+                                  setq-default))))))
                    ((or 'defvar 'defconst)
                     (intern (completing-read
                              "Setter to use: "
@@ -297,11 +321,8 @@ With prefix C-u, set them to default value."
                                setq-local
                                setq-default))))
                    ('defface
-                     (when (member style '(simple))
-                       (intern (completing-read
-                                "Setter to use: "
-                                '( defface
-                                   custom-set-faces))))))))
+                     (cond ((member style '(simple)) 'defface)
+                           ((member style '(custom-set-*)) 'custom-set-faces))))))
     (setq setvarval-extract-type type)
     (setq setvarval-group-style style)
     (setq setvarval-group-setter setter)))
@@ -316,6 +337,7 @@ With NO-KILL-RING set, don't save to kill-ring."
           (pcase setvarval-group-style
             ('simple (setvarval--style-simple list))
             ('one-setter (setvarval--style-one-setter list))
+            ('custom-set-* (setvarval--style-custom-set-* list))
             ('use-package:custom (setvarval--style-use-package:custom list))
             ('use-package:custom-face (setvarval--style-use-package:custom-face list))
             ('leaf:custom* (setvarval--style-leaf:custom* list))
