@@ -1,4 +1,4 @@
-#+title: SetVarVal - (Setq Var Val)
+#+title: SetVarVal ==> (Setq Var Val)
 
 
 * Why
@@ -61,19 +61,20 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
   :straight (:host "github" :repo "qingshuizheng/setvarval")
   :config
   (setq setvarval-extract-type 'defcustom) ; 'defvar, 'defconst, 'defface
-  (setq setvarval-group-setter 'setq)      ; 'setopt, 'customize-set-variables
-  (setq setvarval-group-style 'simple)     ; 'simple, 'group 'use-package 'leaf 'setup
+  (setq setvarval-group-style 'simple)     ; 'simple, 'one-setter, 'custom-set-*, 'use-package:custom(-face), 'leaf:custom(*|-face), 'setup:option
+  (setq setvarval-group-setter 'setq)      ; 'setopt, 'setq-local/default 'customize-set-variables/faces
   )
 #+end_src
 
 * Usage
 
 1. (optional) =M-x setvarval-config RET= to config variables.
-2. =M-x setvarval-extract-current-buffer RET= to collect configs from current buffer into kill-ring. Prefix with =C-u= to preconfig.
-3. =M-x setvarval-extract-current-package RET= to collect configs from package name if cursor is wrapped in a package manager like =use-package/leaf/setup=. Prefix with =C-u= to preconfig.
-4. =M-x setvarval-extract-current-package-insert RET= act like above, but insert configs depending on the vaule of =setvarval-group-style=. Prefix with =C-u= to preconfig.
+2. =M-x setvarval-extract-current-buffer RET= to collect configs from current buffer.
+3. =M-x setvarval-extract-current-package RET= to collect configs from package name if cursor is wrapped in a package manager like =use-package/leaf/setup=.
+4. =M-x setvarval-extract-current-package-insert RET= act like above, but insert configs depending on the vaule of =setvarval-group-style=.
 5. =M-x setvarval-extract-from-name= to collect configs from selected loaded feature. Features not loaded are currently not supported.
-6. Only names with "insert" will insert configs.
+6. Only command names with "insert" will insert configs, otherwise save to kill-ring.
+7. Prefix any command with =C-u= to preconfig 'type/'style/'setter before collecting.
 
 * Features (no ETA)
 
