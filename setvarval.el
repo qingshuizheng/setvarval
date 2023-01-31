@@ -265,7 +265,7 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
   (car-safe (setvarval--inside-pkgmgr-p)))
 
 (defun setvarval--config-set-extract-type ()
-  "Custom set group type."
+  "Customize group type to extract variables from."
   (intern (completing-read
            "Variable type to collect: "
            '( defcustom
@@ -274,6 +274,7 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
               defface))))
 
 (defun setvarval--config-set-group-style (type pkgmgr)
+  "Customize group style based on results of group TYPE and PKGMGR name."
   (pcase type
     ('defcustom (pcase pkgmgr
                   (`nil
@@ -341,6 +342,7 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
                        custom-set-*))))))))
 
 (defun setvarval--config-set-group-setter (type style)
+  "Customize group setter based on group TYPE and group STYLE."
   (pcase type
     ('defcustom
       (cond
@@ -383,6 +385,7 @@ With prefix C-u, set them to default value."
 ;;;###autoload
 (defun setvarval-extract-current-buffer (&optional arg no-kill-ring)
   "Extract variables from current buffer and save to kill-ring.
+With prefix C-u, run `setvarval-config' before extraction.
 With NO-KILL-RING set, don't save to kill-ring."
   (interactive "P")
   (when arg (setvarval-config))
@@ -420,7 +423,7 @@ TODO: Sub-packages and dependancies is not supported currently."
 TODO: Sub-packages and dependancies is not supported currently."
 
 (defun setvarval-extract-from-name (feature)
-  "Extract variables from selection, save to kill-ring.
+  "Extract variables from selected FEATURE, save to kill-ring.
 TODO: Sub-packages and dependancies is not supported currently.
 TODO: support packages that are not loaded yet."
   (interactive (list (completing-read "Choose package: " features)))
