@@ -364,6 +364,11 @@ TODO: Sub-packages and dependancies is not supported currently."
 (defun setvarval-extract-package (feature)
   "Extract variables from current package the cursor is in.
 TODO: Sub-packages and dependancies is not supported currently."
+
+(defun setvarval-extract-from-name (feature)
+  "Extract variables from selection, save to kill-ring.
+TODO: Sub-packages and dependancies is not supported currently.
+TODO: support packages that are not loaded yet."
   (interactive (list (completing-read "Choose package: " features)))
   (with-temp-buffer
     (insert-file-contents
