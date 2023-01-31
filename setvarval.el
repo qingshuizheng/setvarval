@@ -252,52 +252,56 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
 With prefix C-u, set them to default value."
   (interactive)
   (let* ((type (intern (completing-read
-                        "Which type to collect: "
-                        '(defcustom defvar defconst defface))))
+                        "Variable type to collect: "
+                        '( defcustom
+                           defvar
+                           defconst
+                           defface))))
          (style (pcase type
                   ('defcustom
                     (intern (completing-read
-                             "Which style to set: "
+                             "Group style to organize variables: "
                              '(simple
                                one-setter
                                use-package:custom
-                               leaf:custom
                                leaf:custom*
+                               leaf:custom
                                setup:option))))
                   ((or 'defvar 'defconst)
                    (intern (completing-read
-                            "Which Syle to set: "
+                            "Group style to organize variables: "
                             '(simple
                               one-setter))))
-                  ('deface
-                   (intern (completing-read
-                            "Which style to set: "
-                            '(simple
-                              use-package:custom-face
-                              leaf:custom-face))))))
+                  ('defface
+                    (intern (completing-read
+                             "Group style to organize variables: "
+                             '(simple
+                               use-package:custom-face
+                               leaf:custom-face))))))
          (setter (pcase type
                    ('defcustom
-                     (intern (completing-read
-                              "Which setter to use: "
-                              '(setq
-                                setopt
-                                setq-local
-                                setq-default
-                                custom-set-variables))))
+                     (when (member style '(simple one-setter))
+                       (intern (completing-read
+                                "Setter to use: "
+                                '(setq
+                                  setopt
+                                  setq-local
+                                  setq-default
+                                  ;; different form
+                                  ;; custom-set-variables
+                                  )))))
                    ((or 'defvar 'defconst)
                     (intern (completing-read
-                             "Which setter to use: "
+                             "Setter to use: "
                              '(setq
                                setq-local
-                               setq-default
-                               custom-set-variables))))
+                               setq-default))))
                    ('defface
-                     (intern (completing-read
-                              "Which setter to use: "
-                              '( defface
-                                 custom-set-faces
-                                 setq-local
-                                 setq-default)))))))
+                     (when (member style '(simple))
+                       (intern (completing-read
+                                "Setter to use: "
+                                '( defface
+                                   custom-set-faces))))))))
     (setq setvarval-extract-type type)
     (setq setvarval-group-style style)
     (setq setvarval-group-setter setter)))
