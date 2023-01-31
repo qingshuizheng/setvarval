@@ -259,78 +259,125 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
 ;;;; COMMANDS
 
 
+(defun setvarval--config-get-pkgmgr-name ()
+  (car-safe (setvarval--inside-pkgmgr-p)))
+
+(defun setvarval--config-type ()
+  (intern (completing-read
+           "Variable type to collect: "
+           '( defcustom
+              defvar
+              defconst
+              defface))))
+
+(defun setvarval--config-style (type pkgmgr)
+  (pcase type
+    ('defcustom (pcase pkgmgr
+                  (`nil
+                   (intern (completing-read
+                            "Group style to organize variables: "
+                            '(simple
+                              one-setter
+                              custom-set-*
+                              use-package:custom
+                              leaf:custom*
+                              leaf:custom
+                              setup:option))))
+                  (`use-package
+                    (intern (completing-read
+                             "Group style to organize variables: "
+                             '(simple
+                               one-setter
+                               custom-set-*
+                               use-package:custom))))
+                  (`leaf
+                   (intern (completing-read
+                            "Group style to organize variables: "
+                            '(simple
+                              one-setter
+                              custom-set-*
+                              leaf:custom*
+                              leaf:custom))))
+                  (`setup
+                      (intern (completing-read
+                               "Group style to organize variables: "
+                               '(simple
+                                 one-setter
+                                 custom-set-*
+                                 setup:option))))))
+    ((or 'defvar 'defconst)
+     (intern (completing-read
+              "Group style to organize variables: "
+              '(simple
+                one-setter))))
+    ('defface
+      (pcase pkgmgr
+        (`nil
+         (intern (completing-read
+                  "Group style to organize variables: "
+                  '(simple
+                    custom-set-*
+                    use-package:custom-face
+                    leaf:custom-face))))
+        (`use-package
+          (intern (completing-read
+                   "Group style to organize variables: "
+                   '(simple
+                     custom-set-*
+                     use-package:custom-face))))
+        (`leaf
+         (intern (completing-read
+                  "Group style to organize variables: "
+                  '(simple
+                    custom-set-*
+                    leaf:custom-face))))
+        (`setup
+            (intern (completing-read
+                     "Group style to organize variables: "
+                     '(simple
+                       custom-set-*))))))))
+
+(defun setvarval--config-setter (type style)
+  (pcase type
+    ('defcustom
+      (cond
+       ((member style '(custom-set-*)) 'custom-set-variables)
+       ((member style '(simple one-setter))
+        (intern (completing-read
+                 "Setter to use: "
+                 '(setq
+                   setopt
+                   setq-local
+                   setq-default))))))
+    ((or 'defvar 'defconst)
+     (intern (completing-read
+              "Setter to use: "
+              '(setq
+                setq-local
+                setq-default))))
+    ('defface
+      (cond ((member style '(simple)) 'defface)
+            ((member style '(custom-set-*)) 'custom-set-faces)))))
+
 ;;;###autoload
 (defun setvarval-config ()
   "Interactvely config settings.
 With prefix C-u, set them to default value."
   (interactive)
-  (let* ((type (intern (completing-read
-                        "Variable type to collect: "
-                        '( defcustom
-                           defvar
-                           defconst
-                           defface))))
-         (style (pcase type
-                  ('defcustom
-                    (intern (completing-read
-                             "Group style to organize variables: "
-                             '(;; -- (setter var1 val1) (setter var2 val2) ... ...
-                               simple
-                               ;; -- (setter var1 val1 var2 val2 ... ...)
-                               one-setter
-                               ;; -- (custom-set-variables/faces '(var1 val1) '(var2 val2) ... ...)
-                               custom-set-*
-                               ;; -- :custom (var1 val2) (var2 val2) ... ...
-                               use-package:custom
-                               ;; -- :custom* ((var1 val2) (var2 val2) ... ...)
-                               leaf:custom*
-                               ;; -- :custom (var1 . val2) (var2 . val2) ... ...
-                               leaf:custom
-                               ;; -- :option var1 val1 var2 val2 ... ...
-                               setup:option))))
-                  ((or 'defvar 'defconst)
-                   (intern (completing-read
-                            "Group style to organize variables: "
-                            '(simple
-                              one-setter))))
-                  ('defface
-                    (intern (completing-read
-                             "Group style to organize variables: "
-                             '(simple
-                               custom-set-*
-                               ;; -- :custom-face (var1 unquoted-val1) (var2 unquoted-val2) ... ...
-                               use-package:custom-face
-                               ;; -- same as leaf:custom
-                               leaf:custom-face))))))
-         (setter (pcase type
-                   ('defcustom
-                     (cond
-                      ((member style '(custom-set-*)) 'custom-set-variables)
-                      ((member style '(simple one-setter))
-                       (intern (completing-read
-                                "Setter to use: "
-                                '(setq
-                                  setopt
-                                  setq-local
-                                  setq-default))))))
-                   ((or 'defvar 'defconst)
-                    (intern (completing-read
-                             "Setter to use: "
-                             '(setq
-                               setq-local
-                               setq-default))))
-                   ('defface
-                     (cond ((member style '(simple)) 'defface)
-                           ((member style '(custom-set-*)) 'custom-set-faces))))))
+  (let* ((pkgmgr (setvarval--config-get-pkgmgr-name))
+         (type (setvarval--config-type))
+         (style (setvarval--config-style type pkgmgr))
+         (setter (setvarval--config-setter type style)))
     (setq setvarval-extract-type type)
     (setq setvarval-group-style style)
     (setq setvarval-group-setter setter)))
 
 ;;;###autoload
-(defun setvarval-extract-buffer (&optional no-kill-ring)
+(defun setvarval-extract-buffer (&optional arg no-kill-ring)
   "Extract variables from current buffer and save to kill-ring.
 With NO-KILL-RING set, don't save to kill-ring."
-  (interactive)
+  (interactive "P")
+  (when arg (setvarval-config))
   (let* ((list (setvarval--collect-args-from-sexps (current-buffer)))
          (result
           (pcase setvarval-group-style
@@ -357,7 +404,7 @@ TODO: Sub-packages and dependancies is not supported currently."
       (insert-file-contents
        (find-library-name feature))
       (goto-char (point-min))
-      (setvarval-extract-buffer nil))
+      (setvarval-extract-buffer nil nil))
     (message "%s variables extracted to kill-ring." (upcase feature))))
 
 (defun setvarval-extract-package (feature)
@@ -373,7 +420,7 @@ TODO: support packages that are not loaded yet."
     (insert-file-contents
      (find-library-name feature))
     (goto-char (point-min))
-    (setvarval-extract-buffer nil))
+    (setvarval-extract-buffer nil nil))
   (message "%s variables extracted to kill-ring." (upcase feature)))
 
 

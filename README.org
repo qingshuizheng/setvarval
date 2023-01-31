@@ -49,7 +49,7 @@ more and more and more going on...
 
 Go to the package buffer and =M-x varext-extract RET=, variables will be saved to kill-ring. If you need to change setter and variable type, prefix =C-u= before the command to trigger settings.
 
-* TODO LIST (no ETA)
+* Features (no ETA)
 
 - extract type
   - [X] defcustom
