@@ -127,10 +127,93 @@ Alternatives: `setopt', `custom-set-variables', `defface',
              collect (list var val) into args
              finally (return args))))
 
+
+;;; style transformation
+
 (defun setvarval--string-wrap (prefix suffix s)
   "String wrap."
   (declare (indent 1))
   (concat prefix s suffix))
+
+(defun setvarval--style-simple (list)
+  "Transform LIST into group style: simple."
+  (mapconcat
+   (lambda (x)
+     (push setvarval-group-setter x) (format "%S" x))
+   list "\n"))
+
+(defun setvarval--style-one-setter (list)
+  "Transform LIST into group style: one-setter."
+  (setvarval--string-wrap
+      (format "(%S " setvarval-group-setter) ")"
+      (mapconcat
+       (lambda (x)
+         (substring-no-properties
+          (format "%S" x) 1 -1))
+       list "\n")))
+
+(defun setvarval--style-use-package:custom (list)
+  "Transform LIST into group style: use-package:custom.
+See (info \"(use-package) User options\")."
+  (setvarval--string-wrap
+      ":custom\n" nil
+      (mapconcat (lambda (x) (format "%S" x)) list "\n")))
+
+(defun setvarval--style-use-package:custom-face (list)
+  "Transform LIST into group style: use-package:custom-face.
+see (info \"(use-package) Faces\")."
+  (setvarval--string-wrap
+      ":custom-face\n" nil
+      (substring-no-properties
+       (mapconcat
+        (lambda (x) (format "%S" x)) list "\n")
+       1)))
+
+(defun setvarval--style-leaf:custom* (list)
+  "Transform LIST into group style: leaf:custom*.
+See https://github.com/conao3/leaf.el#custom-custom-custom-face-keywords."
+  (setvarval--string-wrap
+      ":custom*\n(" ")"
+      (mapconcat (lambda (x) (format "%S" x)) list "\n")))
+
+(defun setvarval--style-leaf:custom (list)
+  "Transform LIST into group style: leaf:custom.
+See https://github.com/conao3/leaf.el#custom-custom-custom-face-keywords."
+  (setvarval--string-wrap
+      ":custom\n" nil
+      (mapconcat
+       (lambda (x)
+         (concat "("
+                 (format "%S" (car x))
+                 " . "
+                 (format "%S" (cadr x))
+                 ")"))
+       list "\n")))
+
+(defun setvarval--style-leaf:custom-face (list)
+  "Transform LIST into group style: leaf:custom-face.
+See https://github.com/conao3/leaf.el#custom-custom-custom-face-keywords."
+  (setvarval--string-wrap
+      ":custom-face\n" nil
+      (mapconcat
+       (lambda (x)
+         (concat "("
+                 (format "%S" (car x))
+                 " . "
+                 (format "%S" (cadr x))
+                 ")"))
+       list "\n")))
+
+(defun setvarval--style-setup:option (list)
+  "Transform LIST into group style: use-package:custom.
+See https://www.emacswiki.org/emacs/SetupEl for format."
+  (setvarval--string-wrap
+      "(:option\n" ")"
+      (mapconcat
+       (lambda (x)
+         (substring-no-properties (format "%S" x) 1 -1))
+       list "\n")))
+
 
 
 ;;;; COMMANDS
@@ -200,67 +283,14 @@ With C-u prefix, run `setvarval-config' first."
   (kill-new
    (let* ((list (setvarval--collect-args-from-sexps (current-buffer))))
      (pcase setvarval-group-style
-       ;; -- VANILLA
-       ('simple
-        (mapconcat
-         (lambda (x) (push setvarval-group-setter x) (format "%S" x))
-         list "\n"))
-       ('one-setter
-        (setvarval--string-wrap
-            (format "(%S " setvarval-group-setter) ")"
-            (mapconcat
-             (lambda (x) (substring-no-properties (format "%S" x) 1 -1))
-             list "\n")))
-       
-       ;; -- USE-PACKAGE: https://github.com/jwiegley/use-package#package-customization
-       ('use-package:custom
-        (setvarval--string-wrap
-            ":custom\n" nil
-            (mapconcat (lambda (x) (format "%S" x)) list "\n")))
-       ('use-package:custom-face
-        (setvarval--string-wrap
-            ":custom-face\n" nil
-            (substring-no-properties
-             (mapconcat
-              (lambda (x) (format "%S" x)) list "\n")
-             1)))
-       
-       ;; -- LEAF: https://github.com/conao3/leaf.el#custom-custom-custom-face-keywords
-       ('leaf:custom*
-        (setvarval--string-wrap
-            ":custom*\n(" ")"
-            (mapconcat (lambda (x) (format "%S" x)) list "\n")))
-       ('leaf:custom
-        (setvarval--string-wrap
-            ":custom\n" nil
-            (mapconcat
-             (lambda (x)
-               (concat "("
-                       (format "%S" (car x))
-                       " . "
-                       (format "%S" (cadr x))
-                       ")"))
-             list "\n")))
-       ('leaf:custom-face
-        (setvarval--string-wrap
-            ":custom-face\n" nil
-            (mapconcat
-             (lambda (x)
-               (concat "("
-                       (format "%S" (car x))
-                       " . "
-                       (format "%S" (cadr x))
-                       ")"))
-             list "\n")))
-       
-       ;; -- SETUP: https://www.emacswiki.org/emacs/SetupEl
-       ('setup:option
-        (setvarval--string-wrap
-            "(:option\n" ")"
-            (mapconcat
-             (lambda (x)
-               (substring-no-properties (format "%S" x) 1 -1))
-             list "\n")))))))
+       ('simple (setvarval--style-simple list))
+       ('one-setter (setvarval--style-one-setter list))
+       ('use-package:custom (setvarval--style-use-package:custom list))
+       ('use-package:custom-face (setvarval--style-use-package:custom-face list))
+       ('leaf:custom* (setvarval--style-leaf:custom* list))
+       ('leaf:custom (setvarval--style-leaf:custom list))
+       ('leaf:custom-face (setvarval--style-leaf:custom-face list))
+       ('setup:option (setvarval--style-setup:option list))))))
 
 
 (provide 'setvarval)
