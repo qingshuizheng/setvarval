@@ -335,6 +335,18 @@ TODO: Sub-packages and dependancies is not supported currently."
       (setvarval-extract-buffer nil))
     (message "%s variables extracted to kill-ring." (upcase feature))))
 
+(defun setvarval-extract-package (feature)
+  "Extract variables from current package the cursor is in.
+TODO: Sub-packages and dependancies is not supported currently."
+  (interactive (list (completing-read "Choose package: " features)))
+  (with-temp-buffer
+    (insert-file-contents
+     (find-library-name feature))
+    (goto-char (point-min))
+    (setvarval-extract-buffer nil))
+  (message "%s variables extracted to kill-ring." (upcase feature)))
+
+
 
 (provide 'setvarval)
 ;;; setvarval.el ends here
