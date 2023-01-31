@@ -90,11 +90,17 @@ Could be:
 (var2 . val2)
 (var3 . val3)
 
+-- LEAF:CUSTOM*
+:custom*
+((var1 val1)
+ (var2 val2)
+ (var3 val3))
+
 -- SETUP:OPTION
 (:option
- var1 val1
- var2 val2
- var3 val3)"
+  var1 val1
+  var2 val2
+  var3 val3)"
 
   :group 'setvarval
   :type 'symbol)
@@ -109,6 +115,7 @@ Alternatives: `setopt', `custom-set-variables', `defface',
 
 
 ;;;; INTERNAL FUNCTIONALS - data retrieval
+
 
 (defun setvarval--collect-sexps-from-buffer (buf)
   "Collect S-expression from BUF."
@@ -222,6 +229,7 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
 
 
 ;;;; COMMANDS
+
 
 ;;;###autoload
 (defun setvarval-config ()
