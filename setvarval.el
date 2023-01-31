@@ -124,7 +124,7 @@ Alternatives: `setopt', `custom-set-variables', `defface',
   "Package Manager list.")
 
 
-;;;; INTERNAL FUNCTIONALS - data retrieval
+;;;; COLLECT DATA
 
 
 (defun setvarval--collect-sexps-from-buffer (buf)
@@ -150,7 +150,7 @@ Alternatives: `setopt', `custom-set-variables', `defface',
              finally (return args))))
 
 (defun setvarval--inside-pkgmgr-p ()
-  "If cursor within package managers, return pkgmgr name."
+  "If cursor within package manager, return a list: '(pkgmgr name)."
   (save-excursion
     (when (thing-at-point 'defun)
       (beginning-of-defun)
@@ -162,7 +162,8 @@ Alternatives: `setopt', `custom-set-variables', `defface',
 
 
 
-;;; style transformation
+;;;; STYLE TRANSFORMATION
+
 
 (defun setvarval--string-wrap (prefix suffix string)
   "String wrap."
@@ -256,13 +257,15 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
 
 
 
-;;;; COMMANDS
+;;;; CONFIG
 
 
 (defun setvarval--config-get-pkgmgr-name ()
+  "Get package manager name."
   (car-safe (setvarval--inside-pkgmgr-p)))
 
-(defun setvarval--config-type ()
+(defun setvarval--config-set-extract-type ()
+  "Custom set group type."
   (intern (completing-read
            "Variable type to collect: "
            '( defcustom
@@ -270,7 +273,7 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
               defconst
               defface))))
 
-(defun setvarval--config-style (type pkgmgr)
+(defun setvarval--config-set-group-style (type pkgmgr)
   (pcase type
     ('defcustom (pcase pkgmgr
                   (`nil
@@ -337,7 +340,7 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
                      '(simple
                        custom-set-*))))))))
 
-(defun setvarval--config-setter (type style)
+(defun setvarval--config-set-group-setter (type style)
   (pcase type
     ('defcustom
       (cond
@@ -365,15 +368,20 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
 With prefix C-u, set them to default value."
   (interactive)
   (let* ((pkgmgr (setvarval--config-get-pkgmgr-name))
-         (type (setvarval--config-type))
-         (style (setvarval--config-style type pkgmgr))
-         (setter (setvarval--config-setter type style)))
+         (type (setvarval--config-set-extract-type))
+         (style (setvarval--config-set-group-style type pkgmgr))
+         (setter (setvarval--config-set-group-setter type style)))
     (setq setvarval-extract-type type)
     (setq setvarval-group-style style)
     (setq setvarval-group-setter setter)))
 
+
+
+;;;; EXTRACT
+
+
 ;;;###autoload
-(defun setvarval-extract-buffer (&optional arg no-kill-ring)
+(defun setvarval-extract-current-buffer (&optional arg no-kill-ring)
   "Extract variables from current buffer and save to kill-ring.
 With NO-KILL-RING set, don't save to kill-ring."
   (interactive "P")
