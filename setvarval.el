@@ -303,22 +303,24 @@ With prefix C-u, set them to default value."
     (setq setvarval-group-setter setter)))
 
 ;;;###autoload
-(defun setvarval-extract (arg)
-  "Extract variables to kill-ring.
-With C-u prefix, run `setvarval-config' first."
-  (interactive "P")
-  (when arg (setvarval-config))
-  (kill-new
-   (let* ((list (setvarval--collect-args-from-sexps (current-buffer))))
-     (pcase setvarval-group-style
-       ('simple (setvarval--style-simple list))
-       ('one-setter (setvarval--style-one-setter list))
-       ('use-package:custom (setvarval--style-use-package:custom list))
-       ('use-package:custom-face (setvarval--style-use-package:custom-face list))
-       ('leaf:custom* (setvarval--style-leaf:custom* list))
-       ('leaf:custom (setvarval--style-leaf:custom list))
-       ('leaf:custom-face (setvarval--style-leaf:custom-face list))
-       ('setup:option (setvarval--style-setup:option list))))))
+(defun setvarval-extract-buffer (&optional no-kill-ring)
+  "Extract variables from current buffer and save to kill-ring.
+With NO-KILL-RING set, don't save to kill-ring."
+  (interactive)
+  (let* ((list (setvarval--collect-args-from-sexps (current-buffer)))
+         (result
+          (pcase setvarval-group-style
+            ('simple (setvarval--style-simple list))
+            ('one-setter (setvarval--style-one-setter list))
+            ('use-package:custom (setvarval--style-use-package:custom list))
+            ('use-package:custom-face (setvarval--style-use-package:custom-face list))
+            ('leaf:custom* (setvarval--style-leaf:custom* list))
+            ('leaf:custom (setvarval--style-leaf:custom list))
+            ('leaf:custom-face (setvarval--style-leaf:custom-face list))
+            ('setup:option (setvarval--style-setup:option list)))))
+    (if no-kill-ring result
+      (kill-new result))))
+
 
 
 (provide 'setvarval)
