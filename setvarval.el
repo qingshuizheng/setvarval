@@ -157,10 +157,10 @@ Alternatives: `setopt', `custom-set-variables', `defface',
 
 ;;; style transformation
 
-(defun setvarval--string-wrap (prefix suffix s)
+(defun setvarval--string-wrap (prefix suffix string)
   "String wrap."
   (declare (indent 1))
-  (concat prefix s suffix))
+  (concat prefix string suffix))
 
 (defun setvarval--style-simple (list)
   "Transform LIST into group style: simple."
