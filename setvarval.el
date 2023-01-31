@@ -88,9 +88,9 @@ Could be:
 
 -- USE-PACKAGE:CUSTOM-FACE
 :custom
-(var1 (substring-no-properties val1 1))
-(var2 (substring-no-properties val2 1))
-(var3 (substring-no-properties val3 1))
+(var1 unquoted-val1)
+(var2 unquoted-val2)
+(var3 unquoted-val3)
 
 -- LEAF:CUSTOM(-FACE)
 :custom(-face)?
@@ -260,7 +260,7 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
 ;;;; CONFIG
 
 
-(defun setvarval--config-get-pkgmgr-name ()
+(defun setvarval--get-pkgmgr-name ()
   "Get package manager name."
   (car-safe (setvarval--inside-pkgmgr-p)))
 
@@ -369,7 +369,7 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
   "Interactvely config settings.
 With prefix C-u, set them to default value."
   (interactive)
-  (let* ((pkgmgr (setvarval--config-get-pkgmgr-name))
+  (let* ((pkgmgr (setvarval--get-pkgmgr-name))
          (type (setvarval--config-set-extract-type))
          (style (setvarval--config-set-group-style type pkgmgr))
          (setter (setvarval--config-set-group-setter type style)))
@@ -405,10 +405,11 @@ With NO-KILL-RING set, don't save to kill-ring."
       (kill-new result))))
 
 ;;;###autoload
-(defun setvarval-extract-current-package ()
+(defun setvarval-extract-current-package (arg)
   "Extract variables from current package the cursor is in.
 TODO: Sub-packages and dependancies is not supported currently."
-  (interactive)
+  (interactive "P")
+  (when arg (setvarval-config))
   (let* ((pkgmgr-feature (setvarval--inside-pkgmgr-p))
          (feature (format "%S" (cadr pkgmgr-feature))))
     (with-temp-buffer
@@ -418,9 +419,39 @@ TODO: Sub-packages and dependancies is not supported currently."
       (setvarval-extract-buffer nil nil))
     (message "%s variables extracted to kill-ring." (upcase feature))))
 
-(defun setvarval-extract-package (feature)
-  "Extract variables from current package the cursor is in.
-TODO: Sub-packages and dependancies is not supported currently."
+(defun setvarval-extract-current-package-insert (arg)
+  "Extract variables from current package where the cursor is in.
+TODO: Sub-packages and dependancies is not supported currently.
+TODO: support packages that are not loaded yet."
+  (interactive "P")
+  (when arg (setvarval-config))
+  (when-let*
+      ((pkgmgr-feature (setvarval--inside-pkgmgr-p))
+       (pkgmgr (car pkgmgr-feature))
+       (feature (cadr pkgmgr-feature))
+       (result
+        (with-temp-buffer
+          (insert-file-contents
+           (find-library-name (format "%S" feature)))
+          (goto-char (point-min))
+          (setvarval-extract-buffer nil :no-kill-ring))))
+    (if (and pkgmgr-feature
+             (member setvarval-group-style
+                     '(use-package:custom
+                       use-package:custom-face
+                       leaf:custom
+                       leaf:custom*
+                       setup:option)))
+        ;; insert contents after package name
+        (save-excursion
+          (beginning-of-defun)
+          (progn ; for `setup' form: (setup (:straight corfu))
+            (forward-symbol 1)
+            (forward-sexp 1))
+          (insert "\n")
+          (insert result))
+      ;; insert at cursor, so move cursor to target before running
+      (save-excursion (insert result)))))
 
 (defun setvarval-extract-from-name (feature)
   "Extract variables from selected FEATURE, save to kill-ring.
