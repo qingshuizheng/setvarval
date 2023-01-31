@@ -1,11 +1,13 @@
 ;;; setvarval.el --- Extract variables from package -*- lexical-binding: t; -*-
 ;;
-;; Copyright (c) 2022, Qingshui Zheng <qingshuizheng at outlook dot com>
+;; Copyright (c) 2022-2023, Qingshui Zheng <qingshuizheng at outlook
+;; dot com>
 ;;
 ;; Author: Qingshui Zheng <qingshuizheng at outlook dot com>
 ;; Maintainer: Qingshui Zheng <qingshuizheng at outlook dot com>
 ;;
 ;; Created: 21 Dec 2022
+;; Updated: 31 Jan 2023
 ;;
 ;; URL: https://github.com/qingshuizheng/setvarval
 ;;
@@ -34,10 +36,13 @@
 (defgroup setvarval nil
   "Variable extraction."
   :group 'utilities
-  :prefix "setvarval-")
+  :prefix "setvarval-"
+  :link "https://github.com/qingshuizheng/setvarval")
+
 
 
 ;;;; CUSTOMIZATIONS
+
 
 (defcustom setvarval-extract-type 'defcustom
   "Which variable to collect.
