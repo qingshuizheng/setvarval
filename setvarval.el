@@ -136,8 +136,9 @@ Alternatives: `setopt', `custom-set-variables', `defface',
 ;;;; COMMANDS
 
 ;;;###autoload
-(defun setvarval-setting ()
-  "Interactvely config settings."
+(defun setvarval-config ()
+  "Interactvely config settings.
+With prefix C-u, set them to default value."
   (interactive)
   (let* ((type (intern (completing-read
                         "Which type to collect: "
@@ -193,9 +194,9 @@ Alternatives: `setopt', `custom-set-variables', `defface',
 ;;;###autoload
 (defun setvarval-extract (arg)
   "Extract variables to kill-ring.
-With C-u prefix, run `setvarval-setting' first."
+With C-u prefix, run `setvarval-config' first."
   (interactive "P")
-  (when arg (setvarval-setting))
+  (when arg (setvarval-config))
   (kill-new
    (let* ((list (setvarval--collect-args-from-sexps (current-buffer))))
      (pcase setvarval-group-style
