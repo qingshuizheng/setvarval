@@ -3,15 +3,16 @@
 
 * Why
 
-Too often, when we are faced with a new package, one way to explore it is to extract the variables (defcustom/defvar/defconst/defface) and reorganize in a new style. This package saves you some time.
+Too often, I explore one new package by extracting its defcustom/defface/defvar/defconst (mainly the first two), and organizing them into a new style. This package do some stuff for me.
 
-There might be some better packages to do it, but this is my own.
+There might be better packages for this, but this is mine.
 
-* Example
+* Examples
 
-This is what it looks like after extraction from Emacs builtin =simple.el= with default settings. It is truncated due to long list, and it is the reason why this package exists. :-)
+This is what it looks like after extraction from Emacs builtin =simple.el= with default settings. It is truncated due to long list.
 
 #+begin_src emacs-lisp
+;; This is automatically collected with setvarval, hundreds of lines:
 (setq idle-update-delay 0.5)
 (setq next-error-highlight 0.5)
 (setq next-error-highlight-no-select 0.5)
@@ -21,17 +22,39 @@ This is what it looks like after extraction from Emacs builtin =simple.el= with 
 (setq next-error-verbose t)
 (setq next-error-find-buffer-function #'ignore)
 (setq next-error-found-function #'ignore)
-(setq delete-trailing-lines t)
-(setq read-quoted-char-radix 8)
-(setq cycle-spacing-actions '(just-one-space delete-all-space restore))
-(setq delete-active-region t)
-(setq goto-line-history-local nil)
-.
-.
-.
-.
-more and more and more going on...
+;; .
+;; .
+;; .
+;; .
+;; more and more and more going on...
 #+end_src
+
+
+If cursor within =use-package=, and =setvarval-group-style= is set to =use-package:custom=:
+
+#+begin_src emacs-lisp
+
+(use-package simple
+  ;; This line below is automatically collected with setvarval, hundreds of lines:
+  :custom
+  (idle-update-delay 0.5)
+  (next-error-highlight 0.5)
+  (next-error-highlight-no-select 0.5)
+  (next-error-recenter nil)
+  (next-error-message-highlight nil)
+  (next-error-hook nil)
+  (next-error-verbose t)
+  (next-error-find-buffer-function #'ignore)
+  (next-error-found-function #'ignore)
+  ;; .
+  ;; .
+  ;; .
+  ;; .
+  ;; more and more and more going on...
+  )
+
+#+end_src
+
 
 * Installation
 
@@ -47,7 +70,12 @@ more and more and more going on...
 
 * Usage
 
-Go to the package buffer and =M-x varext-extract RET=, variables will be saved to kill-ring. If you need to change setter and variable type, prefix =C-u= before the command to trigger settings.
+1. (optional) =M-x setvarval-config RET= to config variables.
+2. =M-x setvarval-extract-current-buffer RET= to collect configs from current buffer into kill-ring. Prefix with =C-u= to preconfig.
+3. =M-x setvarval-extract-current-package RET= to collect configs from package name if cursor is wrapped in a package manager like =use-package/leaf/setup=. Prefix with =C-u= to preconfig.
+4. =M-x setvarval-extract-current-package-insert RET= act like above, but insert configs depending on the vaule of =setvarval-group-style=. Prefix with =C-u= to preconfig.
+5. =M-x setvarval-extract-from-name= to collect configs from selected loaded feature. Features not loaded are currently not supported.
+6. Only names with "insert" will insert configs.
 
 * Features (no ETA)
 
@@ -59,20 +87,25 @@ Go to the package buffer and =M-x varext-extract RET=, variables will be saved t
 - group setter
   - [X] setq
   - [X] setopt
-  - [X] customize-set-variables
-  - [X] empty setter
+  - [X] customize-set-variables/faces
+  - [X] empty
 - group styles
-  - [X] use-package
-  - [X] leaf
-  - [X] setup
-  - [X] vanilla
-    - [X] default: one line
-    - [X] flatten: grouping wih only one setter
+  - [X] simple
+  - [X] one-setter
+  - [X] custom-set-*
+  - [X] use-package:custom
+  - [X] use-package:custom-face
+  - [X] leaf:custom*
+  - [X] leaf:custom
+  - [X] leaf:custom-face
+  - [X] setup:option
 - content-aware
-  - [ ] use-package
-  - [ ] leaf
-  - [ ] setup
-  - [ ] non of the above, select from feature or file, with prefix with arg
+  - [X] use-package
+  - [X] setup
+  - [X] leaf
+- /TODO/ list
+  - [ ] support collecting configs from features not yet loaded.
+  - [ ] keep val as original state, e.g., ?% instead of 37
 
 * Inspirations
 
