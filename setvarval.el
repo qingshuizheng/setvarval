@@ -112,6 +112,8 @@ Alternatives: `setopt', `custom-set-variables', `defface',
   :group 'setvarval
   :type 'symbol)
 
+(defvar setvarval-pkgmgr-list '(use-package leaf setup)
+  "Package Manager list.")
 
 
 ;;;; INTERNAL FUNCTIONALS - data retrieval
@@ -138,6 +140,19 @@ Alternatives: `setopt', `custom-set-variables', `defface',
              when (eq func setvarval-extract-type)
              collect (list var val) into args
              finally (return args))))
+
+(defun setvarval--inside-pkgmgr-p ()
+  "If cursor within package managers, return pkgmgr name."
+  (save-excursion
+    (cond ((thing-at-point 'symbol))
+          (when (thing-at-point 'defun)
+            (beginning-of-defun)
+            (when-let* ((sexp (read (current-buffer)))
+                        (func (car sexp))
+                        (pkgmgrp (member func setvarval-pkgmgr-list))
+                        (feature (when pkgmgrp (cadr sexp))))
+              (list func feature))))))
+
 
 
 ;;; style transformation
