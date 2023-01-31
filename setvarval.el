@@ -321,6 +321,19 @@ With NO-KILL-RING set, don't save to kill-ring."
     (if no-kill-ring result
       (kill-new result))))
 
+;;;###autoload
+(defun setvarval-extract-current-package ()
+  "Extract variables from current package the cursor is in.
+TODO: Sub-packages and dependancies is not supported currently."
+  (interactive)
+  (let* ((pkgmgr-feature (setvarval--inside-pkgmgr-p))
+         (feature (format "%S" (cadr pkgmgr-feature))))
+    (with-temp-buffer
+      (insert-file-contents
+       (find-library-name feature))
+      (goto-char (point-min))
+      (setvarval-extract-buffer nil))
+    (message "%s variables extracted to kill-ring." (upcase feature))))
 
 
 (provide 'setvarval)
