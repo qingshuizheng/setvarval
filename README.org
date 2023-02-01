@@ -1,13 +1,13 @@
-#+title: SetVarVal ==> (Setq Var Val)
 
+* SetVarVal ==> (Setq Var Val)
 
-* Why
+** Why
 
 Too often, I explore one new package by extracting its defcustom/defface/defvar/defconst (mainly the first two), and organizing them into a new style. This package do some stuff for me.
 
 There might be better packages for this, but this is mine.
 
-* Examples
+** Examples
 
 This is what it looks like after extraction from Emacs builtin =simple.el= with default settings. It is truncated due to long list.
 
@@ -54,7 +54,7 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
 
 #+end_src
 
-* Installation
+** Installation
 
 #+begin_src emacs-lisp
 (use-package setvarval
@@ -66,38 +66,39 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
   )
 #+end_src
 
-* Customizations
+** Customizations
 
 1. =setvarval-extract-type=: variable type to collect =defcustom= =defvar= =defconst= =defface=.
 
 2. =setvarval-group-style=: the way output organize itself.
-   1. ='simple=: ~(setter var1 val1) (setter var2 val2) (setter var3 val3) ...~
-   2. ='one-setter=: ~(setter var1 val1 var2 val2 var3 val3 ...)~
-   3. ='custom-set-*=: ~(custom-set-variables/faces '(var1 val1) '(var2 val2) '(var3 val3) ...)~
-   4. ='use-package:custom=: ~:custom (var1 val1) (var2 val2) (var3 val3) ...~
-   5. ='use-package:custom-face=: ~:custom (var1 unquoted-val1) (var2 unquoted-val2) (var3 unquoted-val3) ...~
-   6. ='leaf:custom=: ~:custom (var1 . val1) (var2 val2) (var3 val3) ...~
-   7. ='leaf:custom-face=: same as 'leaf:custom
-   8. ='leaf:custom*=: ~:custom '((var1 val1) (var2 val2) (var3 val3) ...)~
-   9. ='setup:option=: ~(:option var1 val1 var2 val2 var3 val3 ...)~
+   1. =simple=: ~(setter var1 val1) (setter var2 val2) (setter var3 val3) ...~
+   2. =one-setter=: ~(setter var1 val1 var2 val2 var3 val3 ...)~
+   3. =custom-set-*=: ~(custom-set-variables/faces '(var1 val1) '(var2 val2) '(var3 val3) ...)~
+   4. =use-package:custom=: ~:custom (var1 val1) (var2 val2) (var3 val3) ...~
+   5. =use-package:custom-face=: ~:custom (var1 unquoted-val1) (var2 unquoted-val2) (var3 unquoted-val3) ...~
+   6. =leaf:custom=: ~:custom (var1 . val1) (var2 val2) (var3 val3) ...~
+   7. =leaf:custom-face=: same as 'leaf:custom
+   8. =leaf:custom*=: ~:custom '((var1 val1) (var2 val2) (var3 val3) ...)~
+   9. =setup:option=: ~(:option var1 val1 var2 val2 var3 val3 ...)~
 
 3. =setvarval-group-setter=:
-   1. ='setq= / ='setopt=
-   2. ='custom-set-variables= / ='custom-set-faces=
-   3. ='defface=
+   1. =setq= / =setopt=
+   2. =custom-set-variables= / =custom-set-faces=
+   3. =defface=
 
-* Usage
+** Usage
 
 1. (optional) =M-x setvarval-config RET= to config variables.
-   1. config mechanism: first select variable =type= to extract, then filter out group =style= that are suitable for =type=, finally select reasonable =setter= to match =type= and =style=.
+   1. How config works: first select variable =type= to extract, then filter group =style= that are suitable for =type=, finally select reasonable =setter= to match =type= and =style=.
 2. =M-x setvarval-extract-current-buffer RET= to collect configs from current buffer.
 3. =M-x setvarval-extract-current-package RET= to collect configs from package name if cursor is wrapped in a package manager like =use-package/leaf/setup=.
 4. =M-x setvarval-extract-current-package-insert RET= act like above, but insert configs depending on the vaule of =setvarval-group-style=.
-5. =M-x setvarval-extract-from-name= to collect configs from selected loaded feature. Features not loaded are currently not supported.
+5. =M-x setvarval-extract-from-name= to collect configs from selected loaded feature.
+   1. Features not yet loaded are currently not supported.
 6. Only command names with "insert" will insert configs, otherwise save to kill-ring.
-7. Prefix any command with =C-u= to preconfig ='type= ='style= ='setter= before collecting.
+7. Prefix any command with =C-u= to preconfig =type= =style= =setter= before collecting.
 
-* Features (no ETA)
+** Features (no ETA)
 
 - extract type
   - [X] defcustom
@@ -127,6 +128,6 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
   - [ ] support collecting configs from features not yet loaded.
   - [ ] keep val as original state, e.g., ?% instead of 37
 
-* Inspirations
+** Inspirations
 
 [[https://github.com/rubikitch/auto-document][rubikitch/auto-document]]
