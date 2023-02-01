@@ -389,18 +389,18 @@ With prefix C-u, run `setvarval-config' before extraction.
 With NO-KILL-RING set, don't save to kill-ring."
   (interactive "P")
   (when arg (setvarval-config))
-  (let* ((list (setvarval--collect-args-from-sexps (current-buffer)))
-         (result
-          (pcase setvarval-group-style
-            ('simple (setvarval--style-simple list))
-            ('one-setter (setvarval--style-one-setter list))
-            ('custom-set-* (setvarval--style-custom-set-* list))
-            ('use-package:custom (setvarval--style-use-package:custom list))
-            ('use-package:custom-face (setvarval--style-use-package:custom-face list))
-            ('leaf:custom* (setvarval--style-leaf:custom* list))
-            ('leaf:custom (setvarval--style-leaf:custom list))
-            ('leaf:custom-face (setvarval--style-leaf:custom-face list))
-            ('setup:option (setvarval--style-setup:option list)))))
+  (when-let* ((list (setvarval--collect-args-from-sexps (current-buffer)))
+              (result
+               (pcase setvarval-group-style
+                 ('simple (setvarval--style-simple list))
+                 ('one-setter (setvarval--style-one-setter list))
+                 ('custom-set-* (setvarval--style-custom-set-* list))
+                 ('use-package:custom (setvarval--style-use-package:custom list))
+                 ('use-package:custom-face (setvarval--style-use-package:custom-face list))
+                 ('leaf:custom* (setvarval--style-leaf:custom* list))
+                 ('leaf:custom (setvarval--style-leaf:custom list))
+                 ('leaf:custom-face (setvarval--style-leaf:custom-face list))
+                 ('setup:option (setvarval--style-setup:option list)))))
     (if no-kill-ring result
       (kill-new result))))
 
@@ -410,8 +410,8 @@ With NO-KILL-RING set, don't save to kill-ring."
 TODO: Sub-packages and dependancies is not supported currently."
   (interactive "P")
   (when arg (setvarval-config))
-  (let* ((pkgmgr-feature (setvarval--inside-pkgmgr-p))
-         (feature (format "%S" (cadr pkgmgr-feature))))
+  (when-let* ((pkgmgr-feature (setvarval--inside-pkgmgr-p))
+              (feature (format "%S" (cadr pkgmgr-feature))))
     (with-temp-buffer
       (insert-file-contents
        (find-library-name feature))
@@ -419,6 +419,7 @@ TODO: Sub-packages and dependancies is not supported currently."
       (setvarval-extract-buffer nil nil))
     (message "%s variables extracted to kill-ring." (upcase feature))))
 
+;;;###autoload
 (defun setvarval-extract-current-package-insert (arg)
   "Extract variables from current package where the cursor is in.
 TODO: Sub-packages and dependancies is not supported currently.
@@ -453,13 +454,14 @@ TODO: support packages that are not loaded yet."
       ;; insert at cursor, so move cursor to target before running
       (save-excursion (insert result)))))
 
+;;;###autoload
 (defun setvarval-extract-from-name (arg)
   "Extract variables from selected FEATURE, save to kill-ring.
 TODO: Sub-packages and dependancies is not supported currently.
 TODO: support packages that are not loaded yet."
   (interactive "P")
   (when arg (setvarval-config))
-  (let ((feature (completing-read "Choose package: " features)))
+  (when-let* ((feature (completing-read "Choose package: " features)))
     (with-temp-buffer
       (insert-file-contents
        (find-library-name feature))
