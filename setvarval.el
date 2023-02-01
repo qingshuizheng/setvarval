@@ -416,7 +416,7 @@ TODO: Sub-packages and dependancies is not supported currently."
       (insert-file-contents
        (find-library-name feature))
       (goto-char (point-min))
-      (setvarval-extract-buffer nil nil))
+      (setvarval-extract-current-buffer nil nil))
     (message "%s variables extracted to kill-ring." (upcase feature))))
 
 ;;;###autoload
@@ -435,7 +435,7 @@ TODO: support packages that are not loaded yet."
           (insert-file-contents
            (find-library-name (format "%S" feature)))
           (goto-char (point-min))
-          (setvarval-extract-buffer nil :no-kill-ring))))
+          (setvarval-extract-current-buffer nil :no-kill-ring))))
     (if (and pkgmgr-feature
              (member setvarval-group-style
                      '(use-package:custom
@@ -466,7 +466,7 @@ TODO: support packages that are not loaded yet."
       (insert-file-contents
        (find-library-name feature))
       (goto-char (point-min))
-      (setvarval-extract-buffer nil nil))
+      (setvarval-extract-current-buffer nil nil))
     (message "%s variables extracted to kill-ring." (upcase feature))))
 
 
