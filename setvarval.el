@@ -453,19 +453,19 @@ TODO: support packages that are not loaded yet."
       (indent-region beg (point)))))
 
 ;;;###autoload
-(defun setvarval-extract-from-name (arg)
+(defun setvarval-extract-from-library (arg)
   "Extract variables from selected FEATURE, save to kill-ring.
-TODO: Sub-packages and dependancies is not supported currently.
-TODO: support packages that are not loaded yet."
+With prefix C-u, run `setvarval-config' before extraction.
+TODO: Sub-packages and dependancies is not supported currently."
   (interactive "P")
   (when arg (setvarval-config))
-  (when-let* ((feature (completing-read "Choose package: " features)))
+  (when-let* ((library (read-library-name)))
     (with-temp-buffer
       (insert-file-contents
-       (find-library-name feature))
+       (find-library-name library))
       (goto-char (point-min))
       (setvarval-extract-current-buffer nil nil))
-    (message "%s variables extracted to kill-ring." (upcase feature))))
+    (message "%s variables extracted to kill-ring." (upcase library))))
 
 
 
