@@ -33,6 +33,10 @@
 ;;
 ;;; Code:
 
+(require 'seq)
+(require 'cl-lib)
+
+
 (defgroup setvarval nil
   "Variable extraction."
   :group 'utilities
