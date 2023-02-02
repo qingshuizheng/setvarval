@@ -170,14 +170,14 @@ Alternatives: `setopt', `custom-set-variables', `defface',
   (declare (indent 1))
   (concat prefix string suffix))
 
-(defun setvarval--style-simple (list)
+(defun setvarval--group-style-simple (list)
   "Transform LIST into group style: simple."
   (mapconcat
    (lambda (x)
      (push setvarval-group-setter x) (format "%S" x))
    list "\n"))
 
-(defun setvarval--style-one-setter (list)
+(defun setvarval--group-style-one-setter (list)
   "Transform LIST into group style: one-setter."
   (setvarval--string-wrap
       (format "(%S " setvarval-group-setter) ")"
@@ -187,20 +187,20 @@ Alternatives: `setopt', `custom-set-variables', `defface',
           (format "%S" x) 1 -1))
        list "\n")))
 
-(defun setvarval--style-custom-set-* (list)
+(defun setvarval--group-style-custom-set-* (list)
   "Transform LIST into group style: one-setter."
   (setvarval--string-wrap
       (format "(%S\n" setvarval-group-setter) ")"
       (mapconcat (lambda (x) (concat "'" (format "%S" x))) list "\n")))
 
-(defun setvarval--style-use-package:custom (list)
+(defun setvarval--group-style-use-package:custom (list)
   "Transform LIST into group style: use-package:custom.
 See (info \"(use-package) User options\")."
   (setvarval--string-wrap
       ":custom\n" nil
       (mapconcat (lambda (x) (format "%S" x)) list "\n")))
 
-(defun setvarval--style-use-package:custom-face (list)
+(defun setvarval--group-style-use-package:custom-face (list)
   "Transform LIST into group style: use-package:custom-face.
 see (info \"(use-package) Faces\")."
   (setvarval--string-wrap
@@ -210,14 +210,14 @@ see (info \"(use-package) Faces\")."
         (lambda (x) (format "%S" x)) list "\n")
        1)))
 
-(defun setvarval--style-leaf:custom* (list)
+(defun setvarval--group-style-leaf:custom* (list)
   "Transform LIST into group style: leaf:custom*.
 See https://github.com/conao3/leaf.el#custom-custom-custom-face-keywords."
   (setvarval--string-wrap
       ":custom*\n(" ")"
       (mapconcat (lambda (x) (format "%S" x)) list "\n")))
 
-(defun setvarval--style-leaf:custom (list)
+(defun setvarval--group-style-leaf:custom (list)
   "Transform LIST into group style: leaf:custom.
 See https://github.com/conao3/leaf.el#custom-custom-custom-face-keywords."
   (setvarval--string-wrap
@@ -231,7 +231,7 @@ See https://github.com/conao3/leaf.el#custom-custom-custom-face-keywords."
                  ")"))
        list "\n")))
 
-(defun setvarval--style-leaf:custom-face (list)
+(defun setvarval--group-style-leaf:custom-face (list)
   "Transform LIST into group style: leaf:custom-face.
 See https://github.com/conao3/leaf.el#custom-custom-custom-face-keywords."
   (setvarval--string-wrap
@@ -245,7 +245,7 @@ See https://github.com/conao3/leaf.el#custom-custom-custom-face-keywords."
                  ")"))
        list "\n")))
 
-(defun setvarval--style-setup:option (list)
+(defun setvarval--group-style-setup:option (list)
   "Transform LIST into group style: use-package:custom.
 See https://www.emacswiki.org/emacs/SetupEl for format."
   (setvarval--string-wrap
@@ -392,15 +392,15 @@ With NO-KILL-RING set, don't save to kill-ring."
   (when-let* ((list (setvarval--collect-args-from-sexps (current-buffer)))
               (result
                (pcase setvarval-group-style
-                 ('simple (setvarval--style-simple list))
-                 ('one-setter (setvarval--style-one-setter list))
-                 ('custom-set-* (setvarval--style-custom-set-* list))
-                 ('use-package:custom (setvarval--style-use-package:custom list))
-                 ('use-package:custom-face (setvarval--style-use-package:custom-face list))
-                 ('leaf:custom* (setvarval--style-leaf:custom* list))
-                 ('leaf:custom (setvarval--style-leaf:custom list))
-                 ('leaf:custom-face (setvarval--style-leaf:custom-face list))
-                 ('setup:option (setvarval--style-setup:option list)))))
+                 ('simple (setvarval--group-style-simple list))
+                 ('one-setter (setvarval--group-style-one-setter list))
+                 ('custom-set-* (setvarval--group-style-custom-set-* list))
+                 ('use-package:custom (setvarval--group-style-use-package:custom list))
+                 ('use-package:custom-face (setvarval--group-style-use-package:custom-face list))
+                 ('leaf:custom* (setvarval--group-style-leaf:custom* list))
+                 ('leaf:custom (setvarval--group-style-leaf:custom list))
+                 ('leaf:custom-face (setvarval--group-style-leaf:custom-face list))
+                 ('setup:option (setvarval--group-style-setup:option list)))))
     (if no-kill-ring result
       (kill-new result))))
 
