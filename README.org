@@ -93,7 +93,7 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
 2. =M-x setvarval-extract-current-buffer RET= to collect configs from current buffer.
 3. =M-x setvarval-extract-current-package RET= to collect configs from package name if cursor is wrapped in a package manager like =use-package/leaf/setup=.
 4. =M-x setvarval-extract-current-package-insert RET= act like above, but insert configs depending on the vaule of =setvarval-group-style=.
-5. =M-x setvarval-extract-from-name= to collect configs from selected loaded feature.
+5. =M-x setvarval-extract-from-library= to collect configs from selected loaded feature.
    1. Features not yet loaded are currently not supported.
 6. Only command names with "insert" will insert configs, otherwise save to kill-ring.
 7. Prefix any command with =C-u= to preconfig =type= =style= =setter= before collecting.
@@ -105,11 +105,6 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
   - [X] defface
   - [X] defvar
   - [X] defconst
-- group setter
-  - [X] setq
-  - [X] setopt
-  - [X] customize-set-variables/faces
-  - [X] empty
 - group styles
   - [X] simple
   - [X] one-setter
@@ -120,12 +115,27 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
   - [X] leaf:custom
   - [X] leaf:custom-face
   - [X] setup:option
+- group setter
+  - [X] setq
+  - [X] setopt
+  - [X] customize-set-variables/faces
+  - [X] empty
 - content-aware
   - [X] use-package
   - [X] setup
   - [X] leaf
+  - [ ] (require 's)
+  - [ ] (with-eval-after-load 's)
+  - [ ] backward search library
 - /TODO/ list
-  - [ ] support collecting configs from features not yet loaded.
+  - [X] support collecting configs from features not yet loaded.
+  - [ ] inhibit indent-region messages
+  - [ ] recursively include sub packages
+  - [ ] option to insert variables in a disabled state
+  - [ ] header comments and separators
+  - [ ] support default variable tyle to extract, e.g., =defcustom= and =defface=
+  - [ ] support custom group styles
+  - [ ] better data interaction between setter, var and val
   - [ ] keep val as original state, e.g., ?% instead of 37
 
 ** Inspirations
