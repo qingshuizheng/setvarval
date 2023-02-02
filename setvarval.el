@@ -52,21 +52,16 @@
   "Which variable to collect.
 Alternatives: `defvar', `defface', or `defconst'."
   :group 'setvarval
-  :type 'symbol)
+  :type 'symbol.
+  :options '( defcustom
+              defvar
+              defface
+              defconst))
 
 (defcustom setvarval-group-style 'simple
   "How to format the results.
 
-Could be:
-`simple'
-`one-setter'
-`custom-set-*'
-`use-package:custom'
-`use-package:custom-face'
-`leaf:custom*'
-`leaf:custom'
-`leaf:custom-face'
-`setup:option'.
+Styles:
 
 -- SIMPLE:
 (setter var1 val1)
@@ -115,14 +110,29 @@ Could be:
   var3 val3)"
 
   :group 'setvarval
-  :type 'symbol)
+  :type 'symbol
+  :options '(simple
+             one-setter
+             custom-set-*
+             use-package:custom
+             use-package:custom-face
+             leaf:custom*
+             leaf:custom
+             leaf:custom-face
+             setup:option))
 
 (defcustom setvarval-group-setter 'setq
   "Which setter to use after collecting.
 Alternatives: `setopt', `custom-set-variables', `defface',
 `custom-set-faces', or any random text you like."
   :group 'setvarval
-  :type 'symbol)
+  :type 'symbol
+  :options '(setq
+             setopt
+             defvar
+             defconst
+             custom-set-variables
+             custom-set-faces))
 
 (defvar setvarval-pkgmgr-list '(use-package leaf setup)
   "Package Manager list.")
@@ -263,6 +273,9 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
 
 ;;;; CONFIG
 
+(defun setvarval--extract-type-options ()
+  "Get custom options for `setvarval-extract-type'."
+  (get 'setvarval-extract-type 'custom-options))
 
 (defun setvarval--get-pkgmgr-name ()
   "Get package manager name."
@@ -270,12 +283,10 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
 
 (defun setvarval--config-set-extract-type ()
   "Customize group type to extract variables from."
-  (intern (completing-read
-           "Variable type to collect: "
-           '( defcustom
-              defvar
-              defconst
-              defface))))
+  (let ((types (get 'setvarval-extract-type 'custom-options)))
+    (intern (completing-read
+             "Variable type to collect: "
+             types))))
 
 (defun setvarval--config-set-group-style (type pkgmgr)
   "Customize group style based on results of group TYPE and PKGMGR name."
@@ -356,8 +367,8 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
                  "Setter to use: "
                  '(setq
                    setopt
-                   setq-local
-                   setq-default))))))
+                   setq-default
+                   setq-local))))))
     ((or 'defvar 'defconst)
      (intern (completing-read
               "Setter to use: "
