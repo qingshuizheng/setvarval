@@ -157,8 +157,8 @@ Alternatives: `setopt', `custom-set-variables', `defface',
       (when-let* ((sexp (read (current-buffer)))
                   (func (car sexp))
                   (pkgmgrp (member func setvarval-pkgmgr-list))
-                  (feature (when pkgmgrp (cadr sexp))))
-        (list func feature)))))
+                  (library (when pkgmgrp (cadr sexp))))
+        (list func library)))))
 
 
 
@@ -407,36 +407,34 @@ With NO-KILL-RING set, don't save to kill-ring."
 ;;;###autoload
 (defun setvarval-extract-current-package (arg)
   "Extract variables from current package the cursor is in.
+With prefix C-u, run `setvarval-config' before extraction.
 TODO: Sub-packages and dependancies is not supported currently."
   (interactive "P")
   (when arg (setvarval-config))
-  (when-let* ((pkgmgr-feature (setvarval--inside-pkgmgr-p))
-              (feature (format "%S" (cadr pkgmgr-feature))))
+  (when-let* ((pkgmgr-library (setvarval--inside-pkgmgr-p))
+              (library (format "%S" (cadr pkgmgr-library))))
     (with-temp-buffer
-      (insert-file-contents
-       (find-library-name feature))
+      (insert-file-contents (find-library-name library))
       (goto-char (point-min))
       (setvarval-extract-current-buffer nil nil))
-    (message "%s variables extracted to kill-ring." (upcase feature))))
+    (message "%s variables extracted to kill-ring."
+             (upcase library))))
 
 ;;;###autoload
 (defun setvarval-extract-current-package-insert (arg)
   "Extract variables from current package where the cursor is in.
-TODO: Sub-packages and dependancies is not supported currently.
-TODO: support packages that are not loaded yet."
+With prefix C-u, run `setvarval-config' before extraction.
+TODO: Sub-packages and dependancies is not supported currently."
   (interactive "P")
   (when arg (setvarval-config))
-  (when-let*
-      ((pkgmgr-feature (setvarval--inside-pkgmgr-p))
-       (pkgmgr (car pkgmgr-feature))
-       (feature (cadr pkgmgr-feature))
-       (result
-        (with-temp-buffer
-          (insert-file-contents
-           (find-library-name (format "%S" feature)))
-          (goto-char (point-min))
-          (setvarval-extract-current-buffer nil :no-kill-ring))))
-    (when (and pkgmgr-feature
+  (when-let* ((pkgmgr-library (setvarval--inside-pkgmgr-p))
+              (library (format "%S" (cadr pkgmgr-library)))
+              (result
+               (with-temp-buffer
+                 (insert-file-contents (find-library-name library))
+                 (goto-char (point-min))
+                 (setvarval-extract-current-buffer nil :no-kill-ring))))
+    (when (and pkgmgr-library
                (member setvarval-group-style
                        '(use-package:custom
                          use-package:custom-face
@@ -454,7 +452,7 @@ TODO: support packages that are not loaded yet."
 
 ;;;###autoload
 (defun setvarval-extract-from-library (arg)
-  "Extract variables from selected FEATURE, save to kill-ring.
+  "Extract variables from selected library, save to kill-ring.
 With prefix C-u, run `setvarval-config' before extraction.
 TODO: Sub-packages and dependancies is not supported currently."
   (interactive "P")
