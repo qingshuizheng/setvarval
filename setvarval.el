@@ -370,8 +370,8 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
 With prefix C-u, set them to default value."
   (interactive)
   (let* ((pkgmgr (setvarval--get-pkgmgr-name))
-         (type (setvarval--config-set-extract-type))
-         (style (setvarval--config-set-group-style type pkgmgr))
+         (type   (setvarval--config-set-extract-type))
+         (style  (setvarval--config-set-group-style type pkgmgr))
          (setter (setvarval--config-set-group-setter type style)))
     (setq setvarval-extract-type type)
     (setq setvarval-group-style style)
@@ -436,23 +436,21 @@ TODO: support packages that are not loaded yet."
            (find-library-name (format "%S" feature)))
           (goto-char (point-min))
           (setvarval-extract-current-buffer nil :no-kill-ring))))
-    (if (and pkgmgr-feature
-             (member setvarval-group-style
-                     '(use-package:custom
-                       use-package:custom-face
-                       leaf:custom
-                       leaf:custom*
-                       setup:option)))
-        ;; insert contents after package name
-        (save-excursion
-          (beginning-of-defun)
-          (progn ; for `setup' form: (setup (:straight corfu))
-            (forward-symbol 1)
-            (forward-sexp 1))
-          (insert "\n")
-          (insert result))
-      ;; insert at cursor, so move cursor to target before running
-      (save-excursion (insert result)))))
+    (when (and pkgmgr-feature
+               (member setvarval-group-style
+                       '(use-package:custom
+                         use-package:custom-face
+                         leaf:custom
+                         leaf:custom*
+                         setup:option)))
+      ;; Goto point after package name
+      (beginning-of-defun)
+      (forward-symbol 1)
+      (forward-sexp 1)) ; for `setup' form: (setup (:straight corfu))
+    (let ((beg (point)))
+      (insert "\n")
+      (insert result)
+      (indent-region beg (point)))))
 
 ;;;###autoload
 (defun setvarval-extract-from-name (arg)
