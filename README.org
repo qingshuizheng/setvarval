@@ -137,6 +137,9 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
   - [ ] support custom group styles
   - [ ] better data interaction between setter, var and val
   - [ ] keep val as original state, e.g., ?% instead of 37
+  - [ ] support retrieval of deps
+  - [ ] diff default/user values after extraction
+  - [ ] support doc
 
 ** Inspirations
 

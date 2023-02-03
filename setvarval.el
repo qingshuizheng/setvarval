@@ -33,6 +33,10 @@
 ;;
 ;;; Code:
 
+
+;;;; REQUIREMENTS
+
+;; Built in
 (require 'seq)
 (require 'cl-lib)
 
@@ -364,14 +368,14 @@ See https://www.emacswiki.org/emacs/SetupEl for format."
        ((member style '(custom-set-*)) 'custom-set-variables)
        ((member style '(simple one-setter))
         (intern (completing-read
-                 "Setter to use: "
+                 "Setter to use (choose or type your own): "
                  '(setq
                    setopt
                    setq-default
                    setq-local))))))
     ((or 'defvar 'defconst)
      (intern (completing-read
-              "Setter to use: "
+              "Setter to use (choose or type your own): "
               '(setq
                 setq-local
                 setq-default))))
