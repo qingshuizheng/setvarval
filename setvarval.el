@@ -484,6 +484,21 @@ TODO: Sub-packages and dependancies is not supported currently."
       (setvarval-extract-current-buffer nil nil))
     (message "%s variables extracted to kill-ring." (upcase library))))
 
+;;;###autoload
+(defun setvarval-extract-im-feeling-lucky (arg)
+  "I don't know the package/feature/file name, but I'm feeling lucky.
+Guess from file where symbol is in. With prefix C-u, run
+`setvarval-config' before extraction."
+  (interactive "P")
+  (when arg (setvarval-config))
+  (when-let* ((sym (completing-read "Choose symbol: " obarray))
+              (file
+               (symbol-file ; fixme: it returns .elc file
+                (intern-soft sym))))
+    (with-temp-buffer
+      (insert-file-contents (find-library-name file))
+      (goto-char (point-min))
+      (setvarval-extract-current-buffer nil nil))))
 
 
 (provide 'setvarval)
