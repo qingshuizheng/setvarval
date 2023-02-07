@@ -156,7 +156,7 @@ Alternatives: `setopt', `custom-set-variables', `defface',
                                 (error nil)))
                collect it))))
 
-(defun setvarval--collect-args-from-sexps (buf)
+(defun setvarval--collect-options-from-sexps (buf)
   "Collect variables from S-expression from BUF."
   (let ((sexps (setvarval--collect-sexps-from-buffer buf)))
     (cl-loop for sexp in sexps
@@ -164,8 +164,8 @@ Alternatives: `setopt', `custom-set-variables', `defface',
              for var = (nth 1 sexp)
              for val = (nth 2 sexp)
              when (eq func setvarval-extract-type)
-             collect (list var val) into args
-             finally (return args))))
+             collect (list var val) into options
+             finally (return options))))
 
 (defun setvarval--inside-pkgmgr-p ()
   "If cursor within package manager, return a list: '(pkgmgr name)."
@@ -408,7 +408,7 @@ With prefix C-u, run `setvarval-config' before extraction.
 With NO-KILL-RING set, don't save to kill-ring."
   (interactive "P")
   (when arg (setvarval-config))
-  (when-let* ((list (setvarval--collect-args-from-sexps (current-buffer)))
+  (when-let* ((list (setvarval--collect-options-from-sexps (current-buffer)))
               (result
                (pcase setvarval-group-style
                  ('simple (setvarval--group-style-simple list))
@@ -503,4 +503,3 @@ Guess from file where symbol is in. With prefix C-u, run
 
 (provide 'setvarval)
 ;;; setvarval.el ends here
-

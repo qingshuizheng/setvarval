@@ -1,5 +1,5 @@
 
-* SetVarVal ==> (Setq Var Val)
+* SetVarVal (rename to instant-setup?)==> (Setq Var Val)
 
 ** Why
 
@@ -127,7 +127,7 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
   - [ ] (require 's)
   - [ ] (with-eval-after-load 's)
   - [ ] backward search library
-- /TODO/ list
+- misc /TODO/ list
   - [X] support collecting configs from features not yet loaded.
   - [ ] inhibit indent-region messages
   - [ ] recursively include sub packages
