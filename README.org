@@ -140,6 +140,7 @@ If cursor within =use-package=, and =setvarval-group-style= is set to =use-packa
   - [ ] support retrieval of deps
   - [ ] diff default/user values after extraction
   - [ ] support doc
+  - [ ] support :group in big el files for easy grouping, e.g., telega-customize.el
 
 ** Inspirations
 
